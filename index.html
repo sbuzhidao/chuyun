@@ -3,735 +3,826 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>楚韵 · 湖北农家菜</title>
-  <!-- 字体：毛笔体 + 宋体 -->
+  <title>楚韵农家菜（公园路店）· 扫码点菜单</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     /* ============================================
-       楚韵流水席菜单 - 全局变量与重置
+       楚韵农家菜升级版 - 设计系统
        ============================================ */
     :root {
-      --bg: #F5F0E8;           /* 宣纸暖白 */
-      --card-bg: #EDE6D6;      /* 浅木色 */
-      --red: #8B1A1A;          /* 楚漆暗红 */
-      --red-light: #A83E3E;    /* 暗红提亮 */
-      --text: #3A3226;         /* 墨色 */
-      --text-light: #6B5E4F;   /* 淡墨 */
-      --gold: #B8956A;         /* 暗金点缀 */
+      --bg: #F5F0E8;
+      --bg-warm: #EDE6D6;
+      --bg-dark: #2C2416;
+      --accent: #8B1A1A;
+      --accent-light: #A83E3E;
+      --gold: #B8956A;
+      --gold-light: #D4B896;
+      --text: #3A3226;
+      --text-light: #6B5E4F;
+      --text-white: #F5F0E8;
+      --shadow: rgba(58, 50, 38, 0.06);
+      --shadow-hover: rgba(58, 50, 38, 0.12);
+      --radius: 16px;
+      --radius-sm: 8px;
+      --transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    html, body {
-      width: 100%;
-      height: 100%;
-      overflow-x: hidden;
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Noto Serif SC', 'SimSun', 'STSong', serif;
       background: var(--bg);
       color: var(--text);
-      font-family: 'Noto Serif SC', 'SimSun', 'STSong', serif;
+      overflow-x: hidden;
+      line-height: 1.7;
+    }
+
+    /* --- 滚动条美化 --- */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 4px; }
+
+    /* ============================================
+       加载动画
+       ============================================ */
+    .loading {
+      position: fixed; inset: 0; z-index: 9999;
+      background: var(--bg);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      transition: opacity 0.6s ease, visibility 0.6s ease;
+    }
+    .loading.done { opacity: 0; visibility: hidden; pointer-events: none; }
+    .loading-brand {
+      font-family: 'Ma Shan Zheng', cursive;
+      font-size: 48px; color: var(--accent);
+      letter-spacing: 8px; animation: brandPulse 2s ease-in-out infinite;
+    }
+    .loading-line {
+      width: 60px; height: 1px; background: var(--gold); margin: 16px 0;
+      animation: lineExpand 1.5s ease-in-out infinite;
+    }
+    .loading-text {
+      font-size: 12px; color: var(--text-light); letter-spacing: 4px;
+    }
+    @keyframes brandPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.7; transform: scale(0.95); }
+    }
+    @keyframes lineExpand {
+      0%, 100% { width: 40px; opacity: 0.3; }
+      50% { width: 80px; opacity: 1; }
     }
 
     /* ============================================
-       背景漂浮书法字（若隐若现）
+       导航栏
        ============================================ */
-    .bg-chars {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
+    .navbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 12px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      transition: var(--transition);
+      opacity: 0; transform: translateY(-20px);
+    }
+    .navbar.visible {
+      opacity: 1; transform: translateY(0);
+      background: rgba(245, 240, 232, 0.92);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 2px 20px rgba(58,50,38,0.06);
+    }
+    .navbar-brand {
+      font-family: 'Ma Shan Zheng', cursive; font-size: 20px; color: var(--accent);
+      letter-spacing: 2px;
+    }
+    .navbar-tag {
+      font-size: 11px; color: var(--text-light); background: var(--bg-warm);
+      padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(139,26,26,0.1);
+    }
+
+    /* ============================================
+       首屏 Hero（沉浸式大图）
+       ============================================ */
+    .hero {
+      position: relative; width: 100%; height: 100vh; min-height: 600px;
+      display: flex; align-items: center; justify-content: center;
       overflow: hidden;
     }
-
-    .bg-chars span {
-      position: absolute;
-      font-family: 'Ma Shan Zheng', 'STXingkai', cursive;
-      font-size: clamp(48px, 14vw, 80px);
-      color: var(--red);
-      opacity: 0.04;
-      animation: floatChar 10s ease-in-out infinite;
+    .hero-bg {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse at 30% 70%, rgba(139,26,26,0.15) 0%, transparent 60%),
+        radial-gradient(ellipse at 70% 30%, rgba(184,149,106,0.12) 0%, transparent 50%),
+        linear-gradient(180deg, #E8DED0 0%, #F5F0E8 40%, #F5F0E8 100%);
     }
-
-    .bg-chars span:nth-child(1) { top: 8%; left: 10%; animation-delay: 0s; }
-    .bg-chars span:nth-child(2) { top: 25%; right: 8%; animation-delay: 2.5s; font-size: clamp(36px, 10vw, 60px); }
-    .bg-chars span:nth-child(3) { top: 55%; left: 6%; animation-delay: 5s; font-size: clamp(56px, 16vw, 90px); }
-    .bg-chars span:nth-child(4) { top: 72%; right: 12%; animation-delay: 7.5s; }
-
-    @keyframes floatChar {
-      0%, 100% { opacity: 0.02; transform: translateY(0) rotate(-3deg); }
-      50%       { opacity: 0.07; transform: translateY(-16px) rotate(2deg); }
+    /* 装饰性圆环 */
+    .hero-bg::before {
+      content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 300px; height: 300px; border-radius: 50%;
+      border: 1px solid rgba(139,26,26,0.08); animation: heroRing 20s linear infinite;
     }
-
-    /* ============================================
-       顶部店招区
-       ============================================ */
-    .shop-header {
-      position: relative;
-      z-index: 1;
-      text-align: center;
-      padding: 28px 20px 16px;
+    .hero-bg::after {
+      content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 420px; height: 420px; border-radius: 50%;
+      border: 1px dashed rgba(139,26,26,0.06); animation: heroRing 25s linear infinite reverse;
     }
-
-    .shop-header h1 {
-      font-family: 'Ma Shan Zheng', 'STXingkai', cursive;
-      font-size: clamp(26px, 7vw, 34px);
-      color: var(--red);
-      letter-spacing: 4px;
-      font-weight: 400;
-      line-height: 1.2;
+    @keyframes heroRing {
+      from { transform: translate(-50%, -50%) rotate(0deg); }
+      to { transform: translate(-50%, -50%) rotate(360deg); }
     }
-
-    .shop-header .sub-title {
-      font-size: 13px;
-      color: var(--text-light);
-      margin-top: 6px;
-      letter-spacing: 2px;
+    /* 中心煨锅 */
+    .hero-pot {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 140px; height: 140px; border-radius: 50%; z-index: 1;
+      background: radial-gradient(circle at 35% 35%, var(--accent-light), var(--accent));
+      box-shadow: 0 8px 40px rgba(139,26,26,0.2), inset 0 -4px 12px rgba(0,0,0,0.15);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      animation: potBreath 3s ease-in-out infinite;
     }
-
-    .shop-header .divider {
-      width: 40px;
-      height: 1px;
-      background: var(--gold);
-      margin: 10px auto 0;
+    @keyframes potBreath {
+      0%, 100% { box-shadow: 0 8px 40px rgba(139,26,26,0.2); }
+      50% { box-shadow: 0 12px 50px rgba(139,26,26,0.3); }
     }
+    .hero-pot span:first-child { font-family: 'Ma Shan Zheng', cursive; font-size: 36px; color: white; }
+    .hero-pot span:last-child { font-size: 10px; color: rgba(255,255,255,0.85); letter-spacing: 1px; margin-top: 2px; }
 
-    /* ============================================
-       中部核心交互区 - 环形流水席
-       ============================================ */
-    .carousel-section {
-      position: relative;
-      z-index: 1;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+    .hero-content {
+      position: relative; z-index: 2; text-align: center; padding: 0 24px;
+      margin-top: 120px;
     }
-
-    .ring-area {
-      position: relative;
-      width: 100%;
-      height: clamp(320px, 55vh, 420px);
-      touch-action: pan-y;
-      user-select: none;
+    .hero-title {
+      font-family: 'Ma Shan Zheng', cursive; font-size: clamp(36px, 9vw, 56px);
+      color: var(--accent); letter-spacing: 6px; line-height: 1.2;
+      animation: fadeInUp 1s ease 0.3s both;
     }
-
-    /* --- 中心引力区：一锅汤 --- */
-    .center-pot {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      width: clamp(86px, 22vw, 108px);
-      height: clamp(86px, 22vw, 108px);
-      border-radius: 50%;
-      background: radial-gradient(circle at 35% 35%, var(--red-light), var(--red));
-      box-shadow:
-        0 4px 20px rgba(139, 26, 26, 0.25),
-        inset 0 -4px 12px rgba(0,0,0,0.15),
-        inset 0 2px 6px rgba(255,255,255,0.1);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+    .hero-branch {
+      font-size: 14px; color: var(--gold); letter-spacing: 3px; margin-top: 8px;
+      animation: fadeInUp 1s ease 0.5s both;
+    }
+    .hero-slogan {
+      font-size: 13px; color: var(--text-light); letter-spacing: 2px; margin-top: 16px;
+      animation: fadeInUp 1s ease 0.7s both;
+    }
+    .hero-divider {
+      width: 40px; height: 1px; background: var(--gold); margin: 20px auto;
+      animation: fadeInUp 1s ease 0.9s both;
+    }
+    .hero-scroll {
+      position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      animation: fadeInUp 1s ease 1.2s both;
       cursor: pointer;
-      z-index: 30;
-      animation: potPulse 2.8s ease-in-out infinite;
     }
-
-    @keyframes potPulse {
-      0%, 100% { box-shadow: 0 4px 20px rgba(139,26,26,0.25), 0 0 0 0 rgba(139,26,26,0.15); }
-      50%      { box-shadow: 0 6px 28px rgba(139,26,26,0.3), 0 0 0 12px rgba(139,26,26,0); }
+    .hero-scroll span { font-size: 11px; color: var(--text-light); letter-spacing: 2px; }
+    .hero-scroll .arrow {
+      width: 20px; height: 20px; border-right: 1px solid var(--gold); border-bottom: 1px solid var(--gold);
+      transform: rotate(45deg); animation: arrowBounce 2s ease-in-out infinite;
     }
-
-    .center-pot:active {
-      transform: translate(-50%, -50%) scale(0.95);
-    }
-
-    .pot-icon {
-      font-family: 'Ma Shan Zheng', cursive;
-      font-size: clamp(28px, 7vw, 36px);
-      color: rgba(255,255,255,0.95);
-      line-height: 1;
-    }
-
-    .pot-text {
-      font-size: 10px;
-      color: rgba(255,255,255,0.85);
-      text-align: center;
-      line-height: 1.4;
-      margin-top: 2px;
-      letter-spacing: 1px;
-    }
-
-    /* 中心蒸汽升腾 */
-    .steam-wrap {
-      position: absolute;
-      left: 50%;
-      top: 0;
-      transform: translateX(-50%);
-      width: 60px;
-      height: 40px;
-      pointer-events: none;
-    }
-
-    .steam {
-      position: absolute;
-      bottom: 0;
-      width: 5px;
-      height: 5px;
-      background: rgba(255,255,255,0.35);
-      border-radius: 50%;
-      filter: blur(1px);
-      animation: steamRise 2.2s ease-out infinite;
-    }
-
-    .steam:nth-child(1) { left: 30%; animation-delay: 0s;   width: 4px; height: 4px; }
-    .steam:nth-child(2) { left: 50%; animation-delay: 0.7s; width: 5px; height: 5px; }
-    .steam:nth-child(3) { left: 70%; animation-delay: 1.4s; width: 3px; height: 3px; }
-
-    @keyframes steamRise {
-      0%   { transform: translateY(0) scale(1); opacity: 0.5; }
-      100% { transform: translateY(-36px) scale(2.5); opacity: 0; }
-    }
-
-    /* --- 环形菜品 --- */
-    .dish-ring {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-    }
-
-    .dish-item {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      width: clamp(64px, 17vw, 80px);
-      height: clamp(64px, 17vw, 80px);
-      margin-left: calc(clamp(64px, 17vw, 80px) / -2);
-      margin-top: calc(clamp(64px, 17vw, 80px) / -2);
-      border-radius: 50%;
-      background: var(--card-bg);
-      border: 2px solid var(--red);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      pointer-events: auto;
-      transform: translate(var(--tx), var(--ty)) scale(var(--scale));
-      transition: transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s ease;
-      z-index: var(--z-idx);
-      will-change: transform;
-    }
-
-    .dish-item.active {
-      border-width: 2.5px;
-      box-shadow: 0 10px 30px rgba(139, 26, 26, 0.18);
-    }
-
-    .dish-item::after {
-      content: '';
-      position: absolute;
-      inset: -6px;
-      border-radius: 50%;
-      border: 1px dashed rgba(139, 26, 26, 0.15);
-      opacity: 0;
-      transition: opacity 0.4s ease;
-      pointer-events: none;
-    }
-
-    .dish-item.active::after {
-      opacity: 1;
-      animation: orbitDash 8s linear infinite;
-    }
-
-    @keyframes orbitDash {
-      from { transform: rotate(0deg); }
-      to   { transform: rotate(360deg); }
-    }
-
-    .dish-char {
-      font-family: 'Ma Shan Zheng', cursive;
-      font-size: clamp(22px, 5.5vw, 28px);
-      color: var(--red);
-      line-height: 1;
-    }
-
-    .dish-label {
-      font-size: 9px;
-      color: var(--text-light);
-      margin-top: 2px;
-      letter-spacing: 1px;
-      white-space: nowrap;
-      transform: scale(0.9);
-      opacity: 0.85;
-    }
-
-    /* 荡漾波纹（仅在active菜品显示） */
-    .ripple {
-      position: absolute;
-      inset: 0;
-      border-radius: 50%;
-      border: 1px solid var(--red);
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .dish-item.active .ripple {
-      animation: rippleOut 2s ease-out infinite;
-    }
-
-    .dish-item.active .ripple:nth-child(2) {
-      animation-delay: 0.6s;
-    }
-
-    @keyframes rippleOut {
-      0%   { transform: scale(1); opacity: 0.4; }
-      100% { transform: scale(1.6); opacity: 0; }
-    }
-
-    /* --- 菜品详情区（正下方） --- */
-    .dish-detail {
-      text-align: center;
-      padding: 8px 32px 20px;
-      min-height: 90px;
-      transition: opacity 0.3s ease;
-      position: relative;
-      z-index: 1;
-    }
-
-    .dish-detail.transitioning {
-      opacity: 0;
-    }
-
-    .dish-name {
-      font-family: 'Ma Shan Zheng', cursive;
-      font-size: clamp(20px, 5.5vw, 26px);
-      color: var(--red);
-      letter-spacing: 2px;
-      margin-bottom: 6px;
-    }
-
-    .dish-story {
-      font-size: 13px;
-      color: var(--text-light);
-      line-height: 1.7;
-      letter-spacing: 0.5px;
-    }
-
-    /* 切换指示器 */
-    .dot-indicators {
-      display: flex;
-      justify-content: center;
-      gap: 6px;
-      margin-top: 10px;
-    }
-
-    .dot {
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
-      background: var(--gold);
-      opacity: 0.35;
-      transition: all 0.3s ease;
-    }
-
-    .dot.active {
-      opacity: 1;
-      background: var(--red);
-      transform: scale(1.3);
+    @keyframes arrowBounce {
+      0%, 100% { transform: rotate(45deg) translateY(0); opacity: 0.6; }
+      50% { transform: rotate(45deg) translateY(6px); opacity: 1; }
     }
 
     /* ============================================
-       底部文化故事区（横向滑动卡片）
+       通用动画类
        ============================================ */
-    .story-section {
-      position: relative;
-      z-index: 1;
-      margin-top: 8px;
-      padding-bottom: 32px;
+    .reveal {
+      opacity: 0; transform: translateY(40px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
     }
 
-    .story-section h3 {
-      font-family: 'Ma Shan Zheng', cursive;
-      font-size: 18px;
-      color: var(--red);
-      text-align: center;
-      letter-spacing: 3px;
-      margin-bottom: 14px;
+    /* ============================================
+       板块标题
+       ============================================ */
+    .section-header {
+      text-align: center; padding: 60px 24px 32px;
     }
-
-    .story-cards {
-      display: flex;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch;
-      gap: 12px;
-      padding: 4px 20px 16px;
-      scrollbar-width: none;
-    }
-
-    .story-cards::-webkit-scrollbar {
-      display: none;
-    }
-
-    .story-card {
-      flex: 0 0 82%;
-      max-width: 320px;
-      scroll-snap-align: center;
-      background: var(--card-bg);
-      border-radius: 12px;
-      padding: 18px 18px 16px;
-      border-left: 3px solid var(--red);
-      box-shadow: 0 2px 12px rgba(58, 50, 38, 0.06);
-    }
-
-    .story-card h4 {
-      font-family: 'Ma Shan Zheng', cursive;
-      font-size: 16px;
-      color: var(--red);
+    .section-tag {
+      font-size: 11px; color: var(--gold); letter-spacing: 3px; text-transform: uppercase;
       margin-bottom: 8px;
-      letter-spacing: 1px;
     }
-
-    .story-card p {
-      font-size: 12.5px;
-      color: var(--text-light);
-      line-height: 1.75;
-      letter-spacing: 0.3px;
+    .section-title {
+      font-family: 'Ma Shan Zheng', cursive; font-size: clamp(24px, 6vw, 32px);
+      color: var(--accent); letter-spacing: 3px;
     }
-
-    .story-card .placeholder-img {
-      width: 100%;
-      height: 100px;
-      background: #E0D6C2;
-      border-radius: 8px;
-      margin-top: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      color: #9E917F;
-      letter-spacing: 1px;
+    .section-line {
+      width: 30px; height: 1px; background: var(--gold); margin: 12px auto 0;
     }
-
-    /* 滑动提示 */
-    .swipe-hint {
-      text-align: center;
-      font-size: 11px;
-      color: var(--gold);
-      letter-spacing: 2px;
-      margin-top: 4px;
-      opacity: 0.7;
+    .section-desc {
+      font-size: 13px; color: var(--text-light); margin-top: 12px; max-width: 320px; margin-left: auto; margin-right: auto;
+      line-height: 1.8;
     }
 
     /* ============================================
-       全局水波纹点击反馈
+       招牌推荐（横向滑动）
        ============================================ */
-    .ripple-effect {
-      position: absolute;
-      border-radius: 50%;
-      background: rgba(139, 26, 26, 0.12);
-      transform: scale(0);
-      animation: rippleAnim 0.5s linear;
-      pointer-events: none;
+    .featured-section { padding-bottom: 40px; }
+    .featured-scroll {
+      display: flex; overflow-x: auto; scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch; gap: 16px;
+      padding: 0 20px 16px; scrollbar-width: none;
+    }
+    .featured-scroll::-webkit-scrollbar { display: none; }
+    .featured-card {
+      flex: 0 0 78%; max-width: 300px; scroll-snap-align: center;
+      background: white; border-radius: var(--radius);
+      overflow: hidden; box-shadow: 0 4px 20px var(--shadow);
+      transition: var(--transition);
+    }
+    .featured-card:active { transform: scale(0.98); }
+    .featured-img {
+      width: 100%; height: 180px; position: relative; overflow: hidden;
+      background: linear-gradient(135deg, #E8DED0 0%, #D4C8B0 50%, #C8BAA0 100%);
+    }
+    .featured-img::before {
+      content: attr(data-char); position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Ma Shan Zheng', cursive; font-size: 64px; color: rgba(139,26,26,0.08);
+    }
+    .featured-badge {
+      position: absolute; top: 12px; right: 12px;
+      background: var(--accent); color: white; font-size: 10px;
+      padding: 4px 10px; border-radius: 20px; letter-spacing: 1px;
+    }
+    .featured-info { padding: 16px; }
+    .featured-name {
+      font-family: 'Ma Shan Zheng', cursive; font-size: 20px; color: var(--accent);
+      letter-spacing: 1px;
+    }
+    .featured-price {
+      font-size: 14px; color: var(--gold); font-weight: 600; margin-top: 4px;
+    }
+    .featured-price span { font-size: 11px; color: var(--text-light); font-weight: 400; }
+    .featured-story {
+      font-size: 12px; color: var(--text-light); margin-top: 8px; line-height: 1.7;
     }
 
-    @keyframes rippleAnim {
-      to { transform: scale(4); opacity: 0; }
+    /* ============================================
+       完整菜单（分类+网格）
+       ============================================ */
+    .menu-section { background: var(--bg-warm); padding-bottom: 48px; }
+    .category-tabs {
+      display: flex; gap: 8px; padding: 0 20px 20px; overflow-x: auto;
+      scrollbar-width: none; -webkit-overflow-scrolling: touch;
+    }
+    .category-tabs::-webkit-scrollbar { display: none; }
+    .category-tab {
+      flex: 0 0 auto; padding: 8px 18px; border-radius: 24px;
+      font-size: 13px; color: var(--text-light); background: white;
+      border: 1px solid transparent; cursor: pointer; transition: var(--transition);
+      letter-spacing: 1px; font-family: 'Noto Serif SC', serif;
+    }
+    .category-tab.active {
+      background: var(--accent); color: white; border-color: var(--accent);
+    }
+    .category-tab:not(.active):active { background: var(--bg); }
+
+    .menu-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
+      padding: 0 20px; max-width: 480px; margin: 0 auto;
+    }
+    .menu-item {
+      background: white; border-radius: var(--radius-sm); padding: 14px;
+      box-shadow: 0 2px 8px var(--shadow); transition: var(--transition);
+      cursor: pointer; position: relative; overflow: hidden;
+    }
+    .menu-item:active { transform: scale(0.97); }
+    .menu-item-img {
+      width: 100%; aspect-ratio: 4/3; border-radius: 8px; margin-bottom: 10px;
+      background: linear-gradient(135deg, #EDE6D6, #D4C8B0);
+      position: relative; overflow: hidden;
+    }
+    .menu-item-img::before {
+      content: attr(data-char); position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Ma Shan Zheng', cursive; font-size: 40px; color: rgba(139,26,26,0.06);
+    }
+    .menu-item-tag {
+      position: absolute; top: 6px; left: 6px;
+      font-size: 9px; padding: 2px 6px; border-radius: 4px; color: white; letter-spacing: 1px;
+    }
+    .menu-item-tag.spicy { background: var(--accent); }
+    .menu-item-tag.must { background: var(--gold); }
+    .menu-item-tag.new { background: #5A7D5A; }
+    .menu-item-name { font-family: 'Ma Shan Zheng', cursive; font-size: 16px; color: var(--accent); }
+    .menu-item-price { font-size: 13px; color: var(--gold); font-weight: 600; margin-top: 2px; }
+    .menu-item-desc { font-size: 11px; color: var(--text-light); margin-top: 4px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+    /* ============================================
+       品牌故事（三列卡片）
+       ============================================ */
+    .story-section { padding-bottom: 48px; }
+    .story-cards {
+      display: flex; overflow-x: auto; scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch; gap: 14px;
+      padding: 0 20px 8px; scrollbar-width: none;
+    }
+    .story-cards::-webkit-scrollbar { display: none; }
+    .story-card {
+      flex: 0 0 82%; max-width: 300px; scroll-snap-align: center;
+      background: white; border-radius: var(--radius);
+      padding: 24px; box-shadow: 0 2px 12px var(--shadow);
+      position: relative; overflow: hidden;
+    }
+    .story-card::before {
+      content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%;
+      background: var(--accent);
+    }
+    .story-card h4 {
+      font-family: 'Ma Shan Zheng', cursive; font-size: 18px; color: var(--accent);
+      margin-bottom: 10px; letter-spacing: 2px;
+    }
+    .story-card p {
+      font-size: 13px; color: var(--text-light); line-height: 1.8;
+    }
+    .story-card .story-num {
+      position: absolute; top: 16px; right: 20px;
+      font-family: 'Ma Shan Zheng', cursive; font-size: 36px; color: rgba(139,26,26,0.06);
+      line-height: 1;
+    }
+
+    /* ============================================
+       门店氛围
+       ============================================ */
+    .vibe-section { background: var(--bg-warm); padding-bottom: 48px; }
+    .vibe-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+      padding: 0 20px; max-width: 480px; margin: 0 auto;
+    }
+    .vibe-item {
+      aspect-ratio: 1; border-radius: var(--radius-sm); overflow: hidden;
+      background: linear-gradient(135deg, #E0D6C2, #C8BAA0);
+      position: relative; display: flex; align-items: center; justify-content: center;
+    }
+    .vibe-item:nth-child(3) { grid-column: span 2; aspect-ratio: 16/9; }
+    .vibe-item span {
+      font-family: 'Ma Shan Zheng', cursive; font-size: 24px; color: rgba(139,26,26,0.1);
+      letter-spacing: 4px;
+    }
+    .vibe-item .vibe-label {
+      position: absolute; bottom: 8px; left: 10px;
+      font-size: 10px; color: var(--text-light); background: rgba(245,240,232,0.9);
+      padding: 2px 8px; border-radius: 4px; letter-spacing: 1px;
+    }
+
+    /* ============================================
+       门店信息
+       ============================================ */
+    .store-section { padding-bottom: 48px; }
+    .store-card {
+      background: var(--bg-dark); color: var(--text-white); border-radius: var(--radius);
+      margin: 0 20px; padding: 32px 24px; position: relative; overflow: hidden;
+      max-width: 440px; margin-left: auto; margin-right: auto;
+    }
+    .store-card::before {
+      content: ''; position: absolute; top: -40px; right: -40px; width: 120px; height: 120px;
+      border-radius: 50%; border: 1px solid rgba(184,149,106,0.15);
+    }
+    .store-card h3 {
+      font-family: 'Ma Shan Zheng', cursive; font-size: 24px; color: var(--gold-light);
+      letter-spacing: 3px; margin-bottom: 4px;
+    }
+    .store-card .store-branch {
+      font-size: 12px; color: rgba(245,240,232,0.6); letter-spacing: 2px; margin-bottom: 24px;
+    }
+    .store-info-item {
+      display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px;
+    }
+    .store-info-icon {
+      width: 32px; height: 32px; border-radius: 50%; background: rgba(184,149,106,0.15);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      font-size: 14px; color: var(--gold-light);
+    }
+    .store-info-text { font-size: 13px; line-height: 1.6; color: rgba(245,240,232,0.85); }
+    .store-info-text strong { color: var(--gold-light); font-weight: 600; display: block; margin-bottom: 2px; }
+    .store-actions {
+      display: flex; gap: 10px; margin-top: 24px;
+    }
+    .store-btn {
+      flex: 1; padding: 12px; border-radius: var(--radius-sm); text-align: center;
+      font-size: 13px; letter-spacing: 1px; cursor: pointer; transition: var(--transition);
+      text-decoration: none; font-family: 'Noto Serif SC', serif;
+    }
+    .store-btn.primary {
+      background: var(--accent); color: white; border: none;
+    }
+    .store-btn.primary:active { background: var(--accent-light); }
+    .store-btn.secondary {
+      background: transparent; color: var(--gold-light); border: 1px solid rgba(184,149,106,0.3);
+    }
+    .store-btn.secondary:active { background: rgba(184,149,106,0.1); }
+
+    /* ============================================
+       页脚
+       ============================================ */
+    .footer {
+      background: var(--bg-dark); color: rgba(245,240,232,0.5);
+      padding: 32px 24px 24px; text-align: center;
+    }
+    .footer-brand {
+      font-family: 'Ma Shan Zheng', cursive; font-size: 20px; color: var(--gold-light);
+      letter-spacing: 3px; margin-bottom: 4px;
+    }
+    .footer-branch { font-size: 11px; letter-spacing: 2px; margin-bottom: 16px; }
+    .footer-qr {
+      width: 100px; height: 100px; margin: 0 auto 12px; background: white; padding: 4px; border-radius: 8px;
+    }
+    .footer-qr-inner {
+      width: 100%; height: 100%; background: var(--bg-warm); border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; color: var(--text-light);
+    }
+    .footer-tip { font-size: 11px; letter-spacing: 1px; margin-bottom: 16px; }
+    .footer-copy { font-size: 10px; opacity: 0.5; }
+
+    /* ============================================
+       返回顶部
+       ============================================ */
+    .back-top {
+      position: fixed; bottom: 20px; right: 20px; z-index: 50;
+      width: 44px; height: 44px; border-radius: 50%;
+      background: var(--accent); color: white; border: none;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; cursor: pointer; opacity: 0; transform: translateY(20px);
+      transition: var(--transition); box-shadow: 0 4px 12px rgba(139,26,26,0.3);
+    }
+    .back-top.visible { opacity: 1; transform: translateY(0); }
+    .back-top:active { transform: scale(0.92); }
+
+    /* ============================================
+       背景漂浮字（更 subtle）
+       ============================================ */
+    .bg-float {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
+    }
+    .bg-float span {
+      position: absolute; font-family: 'Ma Shan Zheng', cursive;
+      font-size: clamp(40px, 12vw, 72px); color: var(--accent); opacity: 0.025;
+      animation: bgFloat 12s ease-in-out infinite;
+    }
+    .bg-float span:nth-child(1) { top: 10%; left: 8%; animation-delay: 0s; }
+    .bg-float span:nth-child(2) { top: 35%; right: 5%; animation-delay: 3s; font-size: clamp(32px, 9vw, 56px); }
+    .bg-float span:nth-child(3) { top: 60%; left: 5%; animation-delay: 6s; font-size: clamp(48px, 14vw, 80px); }
+    .bg-float span:nth-child(4) { top: 80%; right: 10%; animation-delay: 9s; }
+    @keyframes bgFloat {
+      0%, 100% { opacity: 0.015; transform: translateY(0); }
+      50% { opacity: 0.04; transform: translateY(-12px); }
     }
   </style>
 </head>
 <body>
 
-  <!-- ========== 背景漂浮书法字 ========== -->
-  <div class="bg-chars">
-    <span>鲜</span>
-    <span>蒸</span>
-    <span>煨</span>
-    <span>情</span>
+  <!-- 加载动画 -->
+  <div class="loading" id="loading">
+    <div class="loading-brand">楚韵</div>
+    <div class="loading-line"></div>
+    <div class="loading-text">公园路店</div>
   </div>
 
-  <!-- ========== 顶部店招区 ========== -->
-  <header class="shop-header">
-    <h1>楚韵 · 湖北农家菜</h1>
-    <p class="sub-title">不时不食，本味楚乡</p>
-    <div class="divider"></div>
-  </header>
+  <!-- 背景漂浮字 -->
+  <div class="bg-float">
+    <span>鲜</span><span>蒸</span><span>煨</span><span>情</span>
+  </div>
 
-  <!-- ========== 中部核心交互区 ========== -->
-  <section class="carousel-section">
-    <div class="ring-area" id="ringArea">
-      <!-- 中心引力区：一锅煨汤 -->
-      <div class="center-pot" id="centerPot" onclick="nextDish(event)">
-        <div class="steam-wrap">
-          <div class="steam"></div>
-          <div class="steam"></div>
-          <div class="steam"></div>
+  <!-- 导航栏 -->
+  <nav class="navbar" id="navbar">
+    <div class="navbar-brand">楚韵</div>
+    <div class="navbar-tag">公园路店</div>
+  </nav>
+
+  <!-- 首屏 Hero -->
+  <section class="hero" id="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-pot">
+      <span>煨</span>
+      <span>一锅煨尽楚乡情</span>
+    </div>
+    <div class="hero-content">
+      <h1 class="hero-title">楚韵农家菜</h1>
+      <p class="hero-branch">公园路店</p>
+      <p class="hero-slogan">不时不食 · 本味楚乡</p>
+      <div class="hero-divider"></div>
+    </div>
+    <div class="hero-scroll" onclick="document.getElementById('featured').scrollIntoView({behavior:'smooth'})">
+      <span>探索菜单</span>
+      <div class="arrow"></div>
+    </div>
+  </section>
+
+  <!-- 招牌推荐 -->
+  <section class="featured-section" id="featured">
+    <div class="section-header reveal">
+      <p class="section-tag">SIGNATURE</p>
+      <h2 class="section-title">招牌必点</h2>
+      <div class="section-line"></div>
+      <p class="section-desc">六道传承楚菜，来自千湖之省的地道风味</p>
+    </div>
+    <div class="featured-scroll" id="featuredScroll"></div>
+  </section>
+
+  <!-- 完整菜单 -->
+  <section class="menu-section" id="menu">
+    <div class="section-header reveal">
+      <p class="section-tag">MENU</p>
+      <h2 class="section-title">楚韵菜单</h2>
+      <div class="section-line"></div>
+      <p class="section-desc">三蒸九扣十大碗，不上蒸笼不成席</p>
+    </div>
+    <div class="category-tabs" id="categoryTabs"></div>
+    <div class="menu-grid" id="menuGrid"></div>
+  </section>
+
+  <!-- 品牌故事 -->
+  <section class="story-section" id="story">
+    <div class="section-header reveal">
+      <p class="section-tag">HERITAGE</p>
+      <h2 class="section-title">楚韵故事</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="story-cards" id="storyCards"></div>
+  </section>
+
+  <!-- 门店氛围 -->
+  <section class="vibe-section" id="vibe">
+    <div class="section-header reveal">
+      <p class="section-tag">ATMOSPHERE</p>
+      <h2 class="section-title">店内氛围</h2>
+      <div class="section-line"></div>
+      <p class="section-desc">大包房、圆桌宴，宝鸡乡党聚会的首选</p>
+    </div>
+    <div class="vibe-grid" id="vibeGrid"></div>
+  </section>
+
+  <!-- 门店信息 -->
+  <section class="store-section" id="store">
+    <div class="section-header reveal">
+      <p class="section-tag">VISIT US</p>
+      <h2 class="section-title">到店指引</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="store-card reveal">
+      <h3>楚韵农家菜</h3>
+      <p class="store-branch">公园路店</p>
+      <div class="store-info-item">
+        <div class="store-info-icon">📍</div>
+        <div class="store-info-text">
+          <strong>地址</strong>
+          宝鸡市公园路（具体门牌号请致电确认）
         </div>
-        <span class="pot-icon">煨</span>
-        <span class="pot-text">一锅煨尽<br>楚乡情</span>
       </div>
-
-      <!-- 环形菜品容器（由JS填充） -->
-      <div class="dish-ring" id="dishRing"></div>
-    </div>
-
-    <!-- 当前菜品详情 -->
-    <div class="dish-detail" id="dishDetail">
-      <h2 class="dish-name" id="dishName"></h2>
-      <p class="dish-story" id="dishStory"></p>
-      <div class="dot-indicators" id="dotIndicators"></div>
+      <div class="store-info-item">
+        <div class="store-info-icon">📞</div>
+        <div class="store-info-text">
+          <strong>预订电话</strong>
+          请致电门店预订包房（电话待补充）
+        </div>
+      </div>
+      <div class="store-info-item">
+        <div class="store-info-icon">🕐</div>
+        <div class="store-info-text">
+          <strong>营业时间</strong>
+          午餐 11:00 - 14:00 / 晚餐 17:00 - 21:00
+        </div>
+      </div>
+      <div class="store-info-item">
+        <div class="store-info-icon">🍽</div>
+        <div class="store-info-text">
+          <strong>特色服务</strong>
+          大包房可预订 · 湖北食材直运 · 承接宴席
+        </div>
+      </div>
+      <div class="store-actions">
+        <a class="store-btn primary" href="tel:请补充电话" onclick="alert('请先在代码中补充门店电话')">📞 电话预订</a>
+        <a class="store-btn secondary" href="https://map.baidu.com/search/宝鸡公园路楚韵农家菜" target="_blank">🧭 导航到店</a>
+      </div>
     </div>
   </section>
 
-  <!-- ========== 底部文化故事区 ========== -->
-  <section class="story-section">
-    <h3>楚韵故事</h3>
-    <div class="story-cards">
-      <div class="story-card">
-        <h4>源于江汉</h4>
-        <p>我们来自千湖之省，鱼米之乡。店里的核心食材，从粉藕到红菜苔，都定期从湖北直运宝鸡，只为一口地道。</p>
-      </div>
-      <div class="story-card">
-        <h4>守于蒸煨</h4>
-        <p>"三蒸九扣十大碗，不上蒸笼不成席"。我们坚守古法，用时间和火候，为您还原食物最本真的味道。</p>
-      </div>
-      <div class="story-card">
-        <h4>聚于人情</h4>
-        <p>我们的大包房，见证了无数宝鸡乡党的欢聚时刻。这里有酒，有故事，等您来把这张墙填满。</p>
-        <div class="placeholder-img">这里有您的笑脸</div>
-      </div>
+  <!-- 页脚 -->
+  <footer class="footer" id="footer">
+    <div class="footer-brand">楚韵农家菜</div>
+    <div class="footer-branch">公园路店</div>
+    <div class="footer-qr">
+      <div class="footer-qr-inner">扫码<br>看菜单</div>
     </div>
-    <p class="swipe-hint">← 左右滑动 →</p>
-  </section>
+    <div class="footer-tip">本店食材定期从湖北直运，保证地道楚味</div>
+    <div class="footer-copy"> 楚韵农家菜（公园路店）· 保留所有权利</div>
+  </footer>
+
+  <!-- 返回顶部 -->
+  <button class="back-top" id="backTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
 
   <script>
     /* ============================================
-       菜品数据配置（可在此修改菜名与故事）
+       数据配置（可在此修改菜品、价格、故事等）
        ============================================ */
-    const DISHES = [
-      { name: '筒子骨莲藕汤', char: '藕', story: '一锅煨尽楚乡情，这是楚菜的灵魂。', label: '招牌' },
-      { name: '沔阳三蒸',     char: '蒸', story: '传承六百年的非遗技法，蒸出软糯鲜香。', label: '非遗' },
-      { name: '霸王鱼头',     char: '鱼', story: '江湖的豪情，就炖在这一锅里。', label: '必点' },
-      { name: '湖塘甲鱼煲',   char: '甲', story: '来自江汉平原的温润滋养。', label: '滋补' },
-      { name: '泥蒿炒腊肉',   char: '蒿', story: '湖畔的清香，时间的风味。', label: '时令' },
-      { name: '卤藕拌豆干',   char: '卤', story: '最地道的荆楚街头味道。', label: '小吃' }
-    ];
-
-    // 环形位置角度配置（从正前方底部开始，逆时针排列）
-    // 顺序：[正前, 右前, 右后, 正后, 左后, 左前]
-    const ANGLES = [90, 30, -30, -90, -150, 150];
-
-    // z-index映射：越靠近前方（y越大），层级越高
-    const Z_MAP = { 90: 25, 30: 19, '-30': 16, '-90': 12, '-150': 16, 150: 19 };
-
-    let currentIndex = 0;     // 当前指向的菜品索引
-    let ringRadius = 130;     // 圆环半径（根据屏幕动态计算）
-    let isAnimating = false;  // 动画锁，防止快速连点
-
-    const ringArea    = document.getElementById('ringArea');
-    const dishRing    = document.getElementById('dishRing');
-    const dishDetail  = document.getElementById('dishDetail');
-    const dishNameEl  = document.getElementById('dishName');
-    const dishStoryEl = document.getElementById('dishStory');
-    const dotsEl      = document.getElementById('dotIndicators');
-    const centerPot   = document.getElementById('centerPot');
+    const DATA = {
+      featured: [
+        { name: '筒子骨莲藕汤', char: '藕', price: '88', unit: '份', badge: '镇店招牌', story: '一锅煨尽楚乡情，粉藕从湖北洪湖直运，文火慢炖四小时。' },
+        { name: '沔阳三蒸', char: '蒸', price: '68', unit: '份', badge: '非遗技艺', story: '传承六百年的沔阳蒸菜，粉蒸肉、蒸鱼、蒸蔬菜，软糯鲜香。' },
+        { name: '霸王鱼头', char: '鱼', price: '128', unit: '份', badge: '必点推荐', story: '江湖豪情炖一锅，鱼头来自丹江口水库，鲜辣入味。' },
+      ],
+      categories: [
+        { id: 'steam', name: '蒸菜' },
+        { id: 'stew', name: '煨菜' },
+        { id: 'river', name: '河鲜' },
+        { id: 'fry', name: '小炒' },
+        { id: 'snack', name: '小吃' },
+      ],
+      menu: {
+        steam: [
+          { name: '沔阳三蒸', char: '蒸', price: '68', tag: '非遗', tagClass: 'must', desc: '粉蒸肉、蒸鱼、蒸蔬菜，三味一体' },
+          { name: '珍珠丸子', char: '珠', price: '48', tag: '必点', tagClass: 'must', desc: '糯米包裹鲜肉，蒸至晶莹剔透' },
+          { name: '蒸茼蒿', char: '茼', price: '28', tag: '时令', tagClass: 'new', desc: '春日时蔬，清淡解腻' },
+          { name: '粉蒸排骨', char: '排', price: '58', tag: '招牌', tagClass: 'must', desc: '湖北五香米粉裹排骨，软糯脱骨' },
+        ],
+        stew: [
+          { name: '筒子骨莲藕汤', char: '藕', price: '88', tag: '镇店', tagClass: 'must', desc: '洪湖粉藕，煨至汤色奶白' },
+          { name: '湖塘甲鱼煲', char: '甲', price: '168', tag: '滋补', tagClass: 'must', desc: '江汉平原野生甲鱼，温补养生' },
+          { name: '腊肉炖鳝鱼', char: '鳝', price: '98', tag: '招牌', tagClass: 'spicy', desc: '农家腊肉配土鳝，汤浓味厚' },
+        ],
+        river: [
+          { name: '霸王鱼头', char: '鱼', price: '128', tag: '必点', tagClass: 'must', desc: '丹江口水库鱼头，鲜辣入魂' },
+          { name: '清蒸武昌鱼', char: '武', price: '78', tag: '经典', tagClass: 'must', desc: '毛主席诗中的名鱼，肉质细嫩' },
+          { name: '干煸泥鳅', char: '鳅', price: '52', tag: '下酒', tagClass: 'spicy', desc: '外酥里嫩，佐酒佳品' },
+          { name: '蒜蓉粉丝蒸扇贝', char: '贝', price: '68', tag: '新品', tagClass: 'new', desc: '蒜香浓郁，粉丝吸汁' },
+        ],
+        fry: [
+          { name: '泥蒿炒腊肉', char: '蒿', price: '42', tag: '时令', tagClass: 'new', desc: '湖畔清香，时间的风味' },
+          { name: '干锅手撕包菜', char: '包', price: '32', tag: '家常', tagClass: 'spicy', desc: '手撕包菜干锅爆炒，脆爽下饭' },
+          { name: '农家小炒肉', char: '肉', price: '38', tag: '必点', tagClass: 'spicy', desc: '五花肉配青椒，经典湘鄂口味' },
+          { name: '酸辣土豆丝', char: '丝', price: '22', tag: '经典', tagClass: 'spicy', desc: '酸辣开胃，桌桌必点' },
+        ],
+        snack: [
+          { name: '卤藕拌豆干', char: '卤', price: '18', tag: '地道', tagClass: 'must', desc: '最地道的荆楚街头味道' },
+          { name: '炸藕夹', char: '夹', price: '28', tag: '小吃', tagClass: 'must', desc: '藕片夹肉，外酥里嫩' },
+          { name: '米酒汤圆', char: '酒', price: '16', tag: '甜品', tagClass: 'new', desc: '湖北孝感米酒，温润甜糯' },
+          { name: '热干面', char: '面', price: '12', tag: '经典', tagClass: 'must', desc: '武汉名片，芝麻酱香浓' },
+        ],
+      },
+      stories: [
+        { title: '源于江汉', num: '壹', desc: '我们来自千湖之省，鱼米之乡。店里的核心食材，从粉藕到红菜苔，都定期从湖北直运宝鸡，只为一口地道。' },
+        { title: '守于蒸煨', num: '贰', desc: '"三蒸九扣十大碗，不上蒸笼不成席"。我们坚守古法，用时间和火候，为您还原食物最本真的味道。' },
+        { title: '聚于人情', num: '叁', desc: '我们的大包房，见证了无数宝鸡乡党的欢聚时刻。这里有酒，有故事，等您来把这张墙填满。' },
+      ],
+      vibes: [
+        { label: '大厅散台', text: '宽敞明亮' },
+        { label: '雅致包房', text: '私密聚会' },
+        { label: '楚韵味道', text: '食材直运' },
+      ],
+    };
 
     /* ============================================
-       初始化：渲染菜品圆点与指示器
+       渲染函数
        ============================================ */
-    function init() {
-      calcRadius();
-
-      // 渲染环形菜品DOM
-      DISHES.forEach((dish, i) => {
-        const el = document.createElement('div');
-        el.className = 'dish-item';
-        el.dataset.index = i;
-        el.innerHTML = `
-          <div class="ripple"></div>
-          <div class="ripple"></div>
-          <span class="dish-char">${dish.char}</span>
-          <span class="dish-label">${dish.label}</span>
+    function render() {
+      // 招牌推荐
+      const featuredScroll = document.getElementById('featuredScroll');
+      DATA.featured.forEach((item, i) => {
+        const card = document.createElement('div');
+        card.className = 'featured-card reveal reveal-delay-' + (i + 1);
+        card.innerHTML = `
+          <div class="featured-img" data-char="${item.char}">
+            <span class="featured-badge">${item.badge}</span>
+          </div>
+          <div class="featured-info">
+            <div class="featured-name">${item.name}</div>
+            <div class="featured-price">¥${item.price}<span> / ${item.unit}</span></div>
+            <div class="featured-story">${item.story}</div>
+          </div>
         `;
-        el.addEventListener('click', (e) => {
-          createClickRipple(e);
-          goToDish(i);
-        });
-        dishRing.appendChild(el);
+        featuredScroll.appendChild(card);
       });
 
-      // 渲染底部指示点
-      DISHES.forEach((_, i) => {
-        const dot = document.createElement('div');
-        dot.className = 'dot' + (i === 0 ? ' active' : '');
-        dot.dataset.index = i;
-        dotsEl.appendChild(dot);
+      // 分类标签
+      const tabs = document.getElementById('categoryTabs');
+      DATA.categories.forEach((cat, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'category-tab' + (i === 0 ? ' active' : '');
+        btn.textContent = cat.name;
+        btn.dataset.category = cat.id;
+        btn.onclick = () => switchCategory(cat.id, btn);
+        tabs.appendChild(btn);
       });
 
-      updatePositions();
-      updateDetail(false);
+      // 初始菜单
+      renderMenu('steam');
 
-      // 监听窗口变化，重算半径
-      window.addEventListener('resize', () => {
-        calcRadius();
-        updatePositions();
+      // 品牌故事
+      const storyCards = document.getElementById('storyCards');
+      DATA.stories.forEach((story, i) => {
+        const card = document.createElement('div');
+        card.className = 'story-card reveal reveal-delay-' + (i + 1);
+        card.innerHTML = `
+          <span class="story-num">${story.num}</span>
+          <h4>${story.title}</h4>
+          <p>${story.desc}</p>
+        `;
+        storyCards.appendChild(card);
       });
+
+      // 门店氛围
+      const vibeGrid = document.getElementById('vibeGrid');
+      DATA.vibes.forEach((vibe, i) => {
+        const item = document.createElement('div');
+        item.className = 'vibe-item reveal reveal-delay-' + (i + 1);
+        item.innerHTML = `<span>${vibe.text}</span><span class="vibe-label">${vibe.label}</span>`;
+        vibeGrid.appendChild(item);
+      });
+      // 补充一个占位图（占两列）
+      const wide = document.createElement('div');
+      wide.className = 'vibe-item reveal';
+      wide.innerHTML = `<span>楚韵味道</span><span class="vibe-label">待补充实景照片</span>`;
+      vibeGrid.appendChild(wide);
     }
 
-    /* ============================================
-       根据屏幕宽度计算圆环半径
-       ============================================ */
-    function calcRadius() {
-      const w = Math.min(window.innerWidth, 430); // 限制最大宽度
-      ringRadius = w * 0.36;
-      if (ringRadius < 110) ringRadius = 110;
-      if (ringRadius > 155) ringRadius = 155;
-    }
-
-    /* ============================================
-       更新所有菜品的位置与层级
-       ============================================ */
-    function updatePositions() {
-      const items = document.querySelectorAll('.dish-item');
-      const total = DISHES.length;
-
+    function renderMenu(categoryId) {
+      const grid = document.getElementById('menuGrid');
+      grid.innerHTML = '';
+      const items = DATA.menu[categoryId] || [];
       items.forEach((item, i) => {
-        const offset = (i - currentIndex + total) % total;
-        const angle = ANGLES[offset];
-        const rad = angle * Math.PI / 180;
-        const tx = ringRadius * Math.cos(rad);
-        const ty = ringRadius * Math.sin(rad);
-        const isActive = offset === 0;
-
-        item.style.setProperty('--tx', tx + 'px');
-        item.style.setProperty('--ty', ty + 'px');
-        item.style.setProperty('--scale', isActive ? '1.32' : '1');
-        item.style.setProperty('--z-idx', Z_MAP[angle] || 10);
-        item.classList.toggle('active', isActive);
+        const div = document.createElement('div');
+        div.className = 'menu-item reveal reveal-delay-' + ((i % 3) + 1);
+        div.innerHTML = `
+          <div class="menu-item-img" data-char="${item.char}">
+            <span class="menu-item-tag ${item.tagClass}">${item.tag}</span>
+          </div>
+          <div class="menu-item-name">${item.name}</div>
+          <div class="menu-item-price">¥${item.price}</div>
+          <div class="menu-item-desc">${item.desc}</div>
+        `;
+        grid.appendChild(div);
       });
+      // 触发重新观察
+      requestAnimationFrame(() => observeElements());
+    }
+
+    function switchCategory(id, btn) {
+      document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      renderMenu(id);
     }
 
     /* ============================================
-       更新菜品详情文字（带动画过渡）
+       滚动动画（Intersection Observer）
        ============================================ */
-    function updateDetail(animate = true) {
-      if (animate) {
-        dishDetail.classList.add('transitioning');
-        setTimeout(() => {
-          setDetailText();
-          dishDetail.classList.remove('transitioning');
-        }, 180);
-      } else {
-        setDetailText();
-      }
-
-      // 更新指示点
-      document.querySelectorAll('.dot').forEach((dot, i) => {
-        dot.classList.toggle('active', i === currentIndex);
-      });
-    }
-
-    function setDetailText() {
-      dishNameEl.textContent = DISHES[currentIndex].name;
-      dishStoryEl.textContent = DISHES[currentIndex].story;
+    let observer;
+    function observeElements() {
+      if (observer) observer.disconnect();
+      observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
+      document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
     }
 
     /* ============================================
-       菜品切换控制
+       导航栏显示/隐藏
        ============================================ */
-    function nextDish(e) {
-      if (e) createClickRipple(e);
-      if (isAnimating) return;
-      isAnimating = true;
-      currentIndex = (currentIndex + 1) % DISHES.length;
-      updatePositions();
-      updateDetail(true);
-      setTimeout(() => { isAnimating = false; }, 450);
-    }
-
-    function prevDish() {
-      if (isAnimating) return;
-      isAnimating = true;
-      currentIndex = (currentIndex - 1 + DISHES.length) % DISHES.length;
-      updatePositions();
-      updateDetail(true);
-      setTimeout(() => { isAnimating = false; }, 450);
-    }
-
-    function goToDish(index) {
-      if (isAnimating || index === currentIndex) return;
-      isAnimating = true;
-      currentIndex = index;
-      updatePositions();
-      updateDetail(true);
-      setTimeout(() => { isAnimating = false; }, 450);
-    }
-
-    /* ============================================
-       触摸滑动交互（环形区域）
-       ============================================ */
-    let touchStartX = 0;
-    let touchStartY = 0;
-    let touchStartTime = 0;
-
-    ringArea.addEventListener('touchstart', (e) => {
-      touchStartX = e.touches[0].clientX;
-      touchStartY = e.touches[0].clientY;
-      touchStartTime = Date.now();
+    const navbar = document.getElementById('navbar');
+    const backTop = document.getElementById('backTop');
+    let lastScroll = 0;
+    window.addEventListener('scroll', () => {
+      const y = window.scrollY;
+      // 导航栏
+      if (y > 300) navbar.classList.add('visible');
+      else navbar.classList.remove('visible');
+      // 返回顶部
+      if (y > 600) backTop.classList.add('visible');
+      else backTop.classList.remove('visible');
+      lastScroll = y;
     }, { passive: true });
 
-    ringArea.addEventListener('touchend', (e) => {
-      const dx = e.changedTouches[0].clientX - touchStartX;
-      const dy = e.changedTouches[0].clientY - touchStartY;
-      const dt = Date.now() - touchStartTime;
-
-      // 水平滑动判定，且速度不能太慢
-      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 36 && dt < 400) {
-        if (dx > 0) prevDish();
-        else nextDish();
-      }
-    }, { passive: true });
-
-    // 鼠标拖拽（桌面端调试支持）
-    let mouseDownX = 0;
-    ringArea.addEventListener('mousedown', (e) => { mouseDownX = e.clientX; });
-    ringArea.addEventListener('mouseup', (e) => {
-      const dx = e.clientX - mouseDownX;
-      if (Math.abs(dx) > 30) {
-        dx > 0 ? prevDish() : nextDish();
-      }
+    /* ============================================
+       加载完成
+       ============================================ */
+    window.addEventListener('load', () => {
+      render();
+      observeElements();
+      setTimeout(() => {
+        document.getElementById('loading').classList.add('done');
+      }, 1200);
     });
-
-    /* ============================================
-       点击水波纹反馈效果
-       ============================================ */
-    function createClickRipple(e) {
-      const el = e.currentTarget;
-      const rect = el.getBoundingClientRect();
-      const ripple = document.createElement('span');
-      ripple.className = 'ripple-effect';
-      const size = Math.max(rect.width, rect.height);
-      ripple.style.width = ripple.style.height = size + 'px';
-      ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
-      ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
-      el.style.position = 'relative';
-      el.style.overflow = 'hidden';
-      el.appendChild(ripple);
-      setTimeout(() => ripple.remove(), 500);
-    }
-
-    /* ============================================
-       启动
-       ============================================ */
-    init();
   </script>
 </body>
 </html>
