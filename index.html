@@ -3,826 +3,570 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>楚韵农家菜（公园路店）· 扫码点菜单</title>
+  <title>楚韵 · 荆楚非遗乡情</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    /* ============================================
-       楚韵农家菜升级版 - 设计系统
-       ============================================ */
+    /* ========== 设计系统 ========== */
     :root {
-      --bg: #F5F0E8;
-      --bg-warm: #EDE6D6;
-      --bg-dark: #2C2416;
-      --accent: #8B1A1A;
-      --accent-light: #A83E3E;
-      --gold: #B8956A;
-      --gold-light: #D4B896;
-      --text: #3A3226;
-      --text-light: #6B5E4F;
-      --text-white: #F5F0E8;
-      --shadow: rgba(58, 50, 38, 0.06);
-      --shadow-hover: rgba(58, 50, 38, 0.12);
-      --radius: 16px;
-      --radius-sm: 8px;
-      --transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      --bg: #F5F0E8; --bg-warm: #EDE6D6; --bg-dark: #2C2416;
+      --accent: #8B1A1A; --accent-light: #A83E3E; --gold: #B8956A; --gold-light: #D4B896;
+      --text: #3A3226; --text-light: #6B5E4F; --text-white: #F5F0E8;
+      --shadow: rgba(58,50,38,0.06); --shadow-hover: rgba(58,50,38,0.12);
+      --radius: 16px; --radius-sm: 10px;
+      --tr: 0.35s cubic-bezier(0.4,0,0.2,1);
     }
+    * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    html { scroll-behavior:smooth; }
+    body { font-family:'Noto Serif SC','SimSun','STSong',serif; background:var(--bg); color:var(--text); overflow-x:hidden; line-height:1.7; }
+    ::-webkit-scrollbar { width:3px; } ::-webkit-scrollbar-thumb { background:var(--gold); border-radius:3px; }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    html { scroll-behavior: smooth; }
-    body {
-      font-family: 'Noto Serif SC', 'SimSun', 'STSong', serif;
-      background: var(--bg);
-      color: var(--text);
-      overflow-x: hidden;
-      line-height: 1.7;
-    }
+    /* ========== 通用动画 ========== */
+    .reveal { opacity:0; transform:translateY(36px); transition:opacity .7s ease, transform .7s ease; }
+    .reveal.visible { opacity:1; transform:translateY(0); }
+    .reveal-d1 { transition-delay:.1s; } .reveal-d2 { transition-delay:.2s; } .reveal-d3 { transition-delay:.3s; }
+    @keyframes fadeInUp { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+    @keyframes float { 0%,100%{opacity:.02;transform:translateY(0)} 50%{opacity:.06;transform:translateY(-14px)} }
+    @keyframes breathe { 0%,100%{box-shadow:0 6px 30px rgba(139,26,26,.18)} 50%{box-shadow:0 10px 40px rgba(139,26,26,.28)} }
+    @keyframes marquee { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
 
-    /* --- 滚动条美化 --- */
-    ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 4px; }
+    /* ========== 加载动画 ========== */
+    .loading { position:fixed; inset:0; z-index:9999; background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center; transition:opacity .6s, visibility .6s; }
+    .loading.done { opacity:0; visibility:hidden; pointer-events:none; }
+    .loading-brand { font-family:'Ma Shan Zheng',cursive; font-size:52px; color:var(--accent); letter-spacing:10px; animation:breatheText 2.2s ease-in-out infinite; }
+    .loading-line { width:50px; height:1px; background:var(--gold); margin:14px 0; animation:lineExpand 1.6s ease-in-out infinite; }
+    .loading-sub { font-size:11px; color:var(--text-light); letter-spacing:4px; }
+    @keyframes breatheText { 0%,100%{opacity:1} 50%{opacity:.6} }
+    @keyframes lineExpand { 0%,100%{width:30px;opacity:.3} 50%{width:70px;opacity:1} }
 
-    /* ============================================
-       加载动画
-       ============================================ */
-    .loading {
-      position: fixed; inset: 0; z-index: 9999;
-      background: var(--bg);
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      transition: opacity 0.6s ease, visibility 0.6s ease;
-    }
-    .loading.done { opacity: 0; visibility: hidden; pointer-events: none; }
-    .loading-brand {
-      font-family: 'Ma Shan Zheng', cursive;
-      font-size: 48px; color: var(--accent);
-      letter-spacing: 8px; animation: brandPulse 2s ease-in-out infinite;
-    }
-    .loading-line {
-      width: 60px; height: 1px; background: var(--gold); margin: 16px 0;
-      animation: lineExpand 1.5s ease-in-out infinite;
-    }
-    .loading-text {
-      font-size: 12px; color: var(--text-light); letter-spacing: 4px;
-    }
-    @keyframes brandPulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.7; transform: scale(0.95); }
-    }
-    @keyframes lineExpand {
-      0%, 100% { width: 40px; opacity: 0.3; }
-      50% { width: 80px; opacity: 1; }
-    }
+    /* ========== 背景漂浮字 ========== */
+    .bg-float { position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
+    .bg-float span { position:absolute; font-family:'Ma Shan Zheng',cursive; font-size:clamp(44px,13vw,76px); color:var(--accent); opacity:.02; animation:float 10s ease-in-out infinite; }
+    .bg-float span:nth-child(1){top:8%;left:6%;animation-delay:0s}
+    .bg-float span:nth-child(2){top:30%;right:4%;animation-delay:2.5s;font-size:clamp(32px,9vw,56px)}
+    .bg-float span:nth-child(3){top:55%;left:4%;animation-delay:5s;font-size:clamp(52px,15vw,84px)}
+    .bg-float span:nth-child(4){top:78%;right:8%;animation-delay:7.5s}
 
-    /* ============================================
-       导航栏
-       ============================================ */
-    .navbar {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-      padding: 12px 20px;
-      display: flex; align-items: center; justify-content: space-between;
-      transition: var(--transition);
-      opacity: 0; transform: translateY(-20px);
-    }
-    .navbar.visible {
-      opacity: 1; transform: translateY(0);
-      background: rgba(245, 240, 232, 0.92);
-      backdrop-filter: blur(12px);
-      box-shadow: 0 2px 20px rgba(58,50,38,0.06);
-    }
-    .navbar-brand {
-      font-family: 'Ma Shan Zheng', cursive; font-size: 20px; color: var(--accent);
-      letter-spacing: 2px;
-    }
-    .navbar-tag {
-      font-size: 11px; color: var(--text-light); background: var(--bg-warm);
-      padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(139,26,26,0.1);
-    }
+    /* ========== 导航栏 ========== */
+    .navbar { position:fixed; top:0; left:0; right:0; z-index:100; padding:10px 18px; display:flex; align-items:center; justify-content:space-between; opacity:0; transform:translateY(-20px); transition:var(--tr); }
+    .navbar.show { opacity:1; transform:translateY(0); background:rgba(245,240,232,.93); backdrop-filter:blur(12px); box-shadow:0 2px 16px var(--shadow); }
+    .navbar-brand { font-family:'Ma Shan Zheng',cursive; font-size:20px; color:var(--accent); letter-spacing:2px; }
+    .navbar-tag { font-size:10px; color:var(--text-light); background:var(--bg-warm); padding:3px 10px; border-radius:20px; border:1px solid rgba(139,26,26,.08); }
 
-    /* ============================================
-       首屏 Hero（沉浸式大图）
-       ============================================ */
-    .hero {
-      position: relative; width: 100%; height: 100vh; min-height: 600px;
-      display: flex; align-items: center; justify-content: center;
-      overflow: hidden;
-    }
-    .hero-bg {
-      position: absolute; inset: 0;
-      background:
-        radial-gradient(ellipse at 30% 70%, rgba(139,26,26,0.15) 0%, transparent 60%),
-        radial-gradient(ellipse at 70% 30%, rgba(184,149,106,0.12) 0%, transparent 50%),
-        linear-gradient(180deg, #E8DED0 0%, #F5F0E8 40%, #F5F0E8 100%);
-    }
-    /* 装饰性圆环 */
-    .hero-bg::before {
-      content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-      width: 300px; height: 300px; border-radius: 50%;
-      border: 1px solid rgba(139,26,26,0.08); animation: heroRing 20s linear infinite;
-    }
-    .hero-bg::after {
-      content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-      width: 420px; height: 420px; border-radius: 50%;
-      border: 1px dashed rgba(139,26,26,0.06); animation: heroRing 25s linear infinite reverse;
-    }
-    @keyframes heroRing {
-      from { transform: translate(-50%, -50%) rotate(0deg); }
-      to { transform: translate(-50%, -50%) rotate(360deg); }
-    }
-    /* 中心煨锅 */
-    .hero-pot {
-      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-      width: 140px; height: 140px; border-radius: 50%; z-index: 1;
-      background: radial-gradient(circle at 35% 35%, var(--accent-light), var(--accent));
-      box-shadow: 0 8px 40px rgba(139,26,26,0.2), inset 0 -4px 12px rgba(0,0,0,0.15);
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      animation: potBreath 3s ease-in-out infinite;
-    }
-    @keyframes potBreath {
-      0%, 100% { box-shadow: 0 8px 40px rgba(139,26,26,0.2); }
-      50% { box-shadow: 0 12px 50px rgba(139,26,26,0.3); }
-    }
-    .hero-pot span:first-child { font-family: 'Ma Shan Zheng', cursive; font-size: 36px; color: white; }
-    .hero-pot span:last-child { font-size: 10px; color: rgba(255,255,255,0.85); letter-spacing: 1px; margin-top: 2px; }
+    /* ========== 弹窗系统 ========== */
+    .modal-overlay { position:fixed; inset:0; z-index:500; background:rgba(44,36,22,.55); opacity:0; visibility:hidden; transition:opacity .3s, visibility .3s; display:flex; align-items:flex-end; justify-content:center; }
+    .modal-overlay.active { opacity:1; visibility:visible; }
+    .modal-box { width:100%; max-width:480px; max-height:85vh; background:var(--bg); border-radius:var(--radius) var(--radius) 0 0; padding:24px 20px 32px; transform:translateY(100%); transition:transform .35s cubic-bezier(.32,.72,.35,1); overflow-y:auto; position:relative; }
+    .modal-overlay.active .modal-box { transform:translateY(0); }
+    .modal-close { position:absolute; top:14px; right:16px; width:32px; height:32px; border-radius:50%; border:none; background:var(--bg-warm); color:var(--text-light); font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+    .modal-close:active { background:var(--gold); color:white; }
+    .modal-title { font-family:'Ma Shan Zheng',cursive; font-size:22px; color:var(--accent); letter-spacing:2px; margin-bottom:16px; padding-right:40px; }
 
-    .hero-content {
-      position: relative; z-index: 2; text-align: center; padding: 0 24px;
-      margin-top: 120px;
-    }
-    .hero-title {
-      font-family: 'Ma Shan Zheng', cursive; font-size: clamp(36px, 9vw, 56px);
-      color: var(--accent); letter-spacing: 6px; line-height: 1.2;
-      animation: fadeInUp 1s ease 0.3s both;
-    }
-    .hero-branch {
-      font-size: 14px; color: var(--gold); letter-spacing: 3px; margin-top: 8px;
-      animation: fadeInUp 1s ease 0.5s both;
-    }
-    .hero-slogan {
-      font-size: 13px; color: var(--text-light); letter-spacing: 2px; margin-top: 16px;
-      animation: fadeInUp 1s ease 0.7s both;
-    }
-    .hero-divider {
-      width: 40px; height: 1px; background: var(--gold); margin: 20px auto;
-      animation: fadeInUp 1s ease 0.9s both;
-    }
-    .hero-scroll {
-      position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
-      display: flex; flex-direction: column; align-items: center; gap: 6px;
-      animation: fadeInUp 1s ease 1.2s both;
-      cursor: pointer;
-    }
-    .hero-scroll span { font-size: 11px; color: var(--text-light); letter-spacing: 2px; }
-    .hero-scroll .arrow {
-      width: 20px; height: 20px; border-right: 1px solid var(--gold); border-bottom: 1px solid var(--gold);
-      transform: rotate(45deg); animation: arrowBounce 2s ease-in-out infinite;
-    }
-    @keyframes arrowBounce {
-      0%, 100% { transform: rotate(45deg) translateY(0); opacity: 0.6; }
-      50% { transform: rotate(45deg) translateY(6px); opacity: 1; }
-    }
+    /* ========== 首屏 Hero（修复文字重叠） ========== */
+    .hero { position:relative; width:100%; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:100px 24px 60px; overflow:hidden; }
+    .hero-bg { position:absolute; inset:0; background:radial-gradient(ellipse at 30% 70%,rgba(139,26,26,.12) 0%,transparent 60%),radial-gradient(ellipse at 70% 30%,rgba(184,149,106,.1) 0%,transparent 50%),linear-gradient(180deg,#E8DED0 0%,var(--bg) 50%,var(--bg) 100%); z-index:0; }
+    .hero-ring { position:absolute; top:35%; left:50%; transform:translate(-50%,-50%); width:280px; height:280px; border-radius:50%; border:1px solid rgba(139,26,26,.06); animation:spin 30s linear infinite; pointer-events:none; z-index:1; }
+    .hero-ring:nth-child(3) { width:360px; height:360px; border-style:dashed; animation-direction:reverse; animation-duration:40s; }
+    @keyframes spin { from{transform:translate(-50%,-50%) rotate(0)} to{transform:translate(-50%,-50%) rotate(360deg)} }
+    .hero-pot { position:relative; z-index:2; width:120px; height:120px; border-radius:50%; background:radial-gradient(circle at 35% 35%,var(--accent-light),var(--accent)); box-shadow:0 8px 32px rgba(139,26,26,.22),inset 0 -3px 10px rgba(0,0,0,.12); display:flex; flex-direction:column; align-items:center; justify-content:center; animation:breathe 3s ease-in-out infinite; margin-bottom:8px; }
+    .hero-pot .pot-char { font-family:'Ma Shan Zheng',cursive; font-size:32px; color:rgba(255,255,255,.95); line-height:1; }
+    .hero-pot .pot-text { font-size:9px; color:rgba(255,255,255,.8); letter-spacing:1px; margin-top:2px; }
+    .hero-content { position:relative; z-index:2; text-align:center; }
+    .hero-verse { font-family:'Ma Shan Zheng',cursive; font-size:clamp(32px,8vw,48px); color:var(--accent); letter-spacing:5px; line-height:1.3; animation:fadeInUp 1s ease .2s both; }
+    .hero-verse-sub { font-size:13px; color:var(--gold); letter-spacing:3px; margin-top:8px; animation:fadeInUp 1s ease .4s both; }
+    .hero-branch { font-size:12px; color:var(--text-light); letter-spacing:2px; margin-top:12px; animation:fadeInUp 1s ease .6s both; }
+    .hero-btns { display:flex; gap:12px; justify-content:center; margin-top:28px; animation:fadeInUp 1s ease .8s both; }
+    .hero-btn { padding:12px 28px; border-radius:30px; font-size:13px; letter-spacing:2px; cursor:pointer; transition:var(--tr); font-family:'Noto Serif SC',serif; text-decoration:none; }
+    .hero-btn.primary { background:var(--accent); color:white; border:none; box-shadow:0 4px 16px rgba(139,26,26,.2); }
+    .hero-btn.primary:active { transform:scale(.96); background:var(--accent-light); }
+    .hero-btn.ghost { background:transparent; color:var(--accent); border:1.5px solid var(--accent); }
+    .hero-btn.ghost:active { background:rgba(139,26,26,.04); transform:scale(.96); }
+    .hero-scroll { position:absolute; bottom:24px; left:50%; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; gap:6px; animation:fadeInUp 1s ease 1.1s both; cursor:pointer; }
+    .hero-scroll span { font-size:10px; color:var(--text-light); letter-spacing:2px; }
+    .hero-scroll .arrow { width:16px; height:16px; border-right:1.5px solid var(--gold); border-bottom:1.5px solid var(--gold); transform:rotate(45deg); animation:arrowBounce 2.2s ease-in-out infinite; }
+    @keyframes arrowBounce { 0%,100%{transform:rotate(45deg) translateY(0);opacity:.5} 50%{transform:rotate(45deg) translateY(5px);opacity:1} }
 
-    /* ============================================
-       通用动画类
-       ============================================ */
-    .reveal {
-      opacity: 0; transform: translateY(40px);
-      transition: opacity 0.8s ease, transform 0.8s ease;
-    }
-    .reveal.visible { opacity: 1; transform: translateY(0); }
-    .reveal-delay-1 { transition-delay: 0.1s; }
-    .reveal-delay-2 { transition-delay: 0.2s; }
-    .reveal-delay-3 { transition-delay: 0.3s; }
+    /* ========== 滚动导视 ========== */
+    .guide-bar { background:var(--bg-dark); color:var(--text-white); padding:14px 20px; overflow:hidden; white-space:nowrap; }
+    .guide-track { display:inline-block; animation:marquee 20s linear infinite; }
+    .guide-text { display:inline-block; font-size:12px; letter-spacing:3px; color:var(--gold-light); opacity:.85; padding:0 30px; }
 
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    @keyframes shimmer {
-      0% { background-position: -200% 0; }
-      100% { background-position: 200% 0; }
-    }
+    /* ========== 板块标题 ========== */
+    .sec-head { text-align:center; padding:56px 24px 28px; }
+    .sec-tag { font-size:10px; color:var(--gold); letter-spacing:3px; margin-bottom:6px; }
+    .sec-title { font-family:'Ma Shan Zheng',cursive; font-size:clamp(22px,5.5vw,28px); color:var(--accent); letter-spacing:3px; }
+    .sec-line { width:28px; height:1px; background:var(--gold); margin:10px auto 0; }
+    .sec-desc { font-size:12px; color:var(--text-light); margin-top:10px; max-width:300px; margin-left:auto; margin-right:auto; line-height:1.8; }
 
-    /* ============================================
-       板块标题
-       ============================================ */
-    .section-header {
-      text-align: center; padding: 60px 24px 32px;
-    }
-    .section-tag {
-      font-size: 11px; color: var(--gold); letter-spacing: 3px; text-transform: uppercase;
-      margin-bottom: 8px;
-    }
-    .section-title {
-      font-family: 'Ma Shan Zheng', cursive; font-size: clamp(24px, 6vw, 32px);
-      color: var(--accent); letter-spacing: 3px;
-    }
-    .section-line {
-      width: 30px; height: 1px; background: var(--gold); margin: 12px auto 0;
-    }
-    .section-desc {
-      font-size: 13px; color: var(--text-light); margin-top: 12px; max-width: 320px; margin-left: auto; margin-right: auto;
-      line-height: 1.8;
-    }
+    /* ========== 招牌菜品 ========== */
+    .featured { padding-bottom:36px; }
+    .featured-scroll { display:flex; overflow-x:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; gap:14px; padding:0 20px 14px; scrollbar-width:none; }
+    .featured-scroll::-webkit-scrollbar { display:none; }
+    .feat-card { flex:0 0 80%; max-width:300px; scroll-snap-align:center; background:white; border-radius:var(--radius); overflow:hidden; box-shadow:0 3px 16px var(--shadow); transition:var(--tr); cursor:pointer; }
+    .feat-card:active { transform:scale(.97); }
+    .feat-img { width:100%; height:170px; position:relative; overflow:hidden; background:linear-gradient(135deg,#E8DED0,#D4C8B0); }
+    .feat-img::before { content:attr(data-char); position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:'Ma Shan Zheng',cursive; font-size:60px; color:rgba(139,26,26,.06); }
+    .feat-badge { position:absolute; top:10px; right:10px; background:var(--accent); color:white; font-size:9px; padding:3px 10px; border-radius:20px; letter-spacing:1px; }
+    .feat-body { padding:14px; }
+    .feat-name { font-family:'Ma Shan Zheng',cursive; font-size:18px; color:var(--accent); }
+    .feat-meta { display:flex; align-items:center; justify-content:space-between; margin-top:4px; }
+    .feat-price { font-size:14px; color:var(--gold); font-weight:600; }
+    .feat-price span { font-size:10px; color:var(--text-light); font-weight:400; }
+    .feat-tag { font-size:9px; color:var(--accent); background:rgba(139,26,26,.06); padding:2px 8px; border-radius:4px; }
+    .feat-story { font-size:11px; color:var(--text-light); margin-top:8px; line-height:1.6; }
 
-    /* ============================================
-       招牌推荐（横向滑动）
-       ============================================ */
-    .featured-section { padding-bottom: 40px; }
-    .featured-scroll {
-      display: flex; overflow-x: auto; scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch; gap: 16px;
-      padding: 0 20px 16px; scrollbar-width: none;
-    }
-    .featured-scroll::-webkit-scrollbar { display: none; }
-    .featured-card {
-      flex: 0 0 78%; max-width: 300px; scroll-snap-align: center;
-      background: white; border-radius: var(--radius);
-      overflow: hidden; box-shadow: 0 4px 20px var(--shadow);
-      transition: var(--transition);
-    }
-    .featured-card:active { transform: scale(0.98); }
-    .featured-img {
-      width: 100%; height: 180px; position: relative; overflow: hidden;
-      background: linear-gradient(135deg, #E8DED0 0%, #D4C8B0 50%, #C8BAA0 100%);
-    }
-    .featured-img::before {
-      content: attr(data-char); position: absolute; inset: 0;
-      display: flex; align-items: center; justify-content: center;
-      font-family: 'Ma Shan Zheng', cursive; font-size: 64px; color: rgba(139,26,26,0.08);
-    }
-    .featured-badge {
-      position: absolute; top: 12px; right: 12px;
-      background: var(--accent); color: white; font-size: 10px;
-      padding: 4px 10px; border-radius: 20px; letter-spacing: 1px;
-    }
-    .featured-info { padding: 16px; }
-    .featured-name {
-      font-family: 'Ma Shan Zheng', cursive; font-size: 20px; color: var(--accent);
-      letter-spacing: 1px;
-    }
-    .featured-price {
-      font-size: 14px; color: var(--gold); font-weight: 600; margin-top: 4px;
-    }
-    .featured-price span { font-size: 11px; color: var(--text-light); font-weight: 400; }
-    .featured-story {
-      font-size: 12px; color: var(--text-light); margin-top: 8px; line-height: 1.7;
-    }
+    /* ========== 分类导航 ========== */
+    .cat-tabs { display:flex; gap:8px; padding:0 20px 18px; overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+    .cat-tabs::-webkit-scrollbar { display:none; }
+    .cat-tab { flex:0 0 auto; padding:7px 16px; border-radius:24px; font-size:12px; color:var(--text-light); background:white; border:1px solid transparent; cursor:pointer; transition:var(--tr); letter-spacing:1px; font-family:'Noto Serif SC',serif; }
+    .cat-tab.active { background:var(--accent); color:white; border-color:var(--accent); }
 
-    /* ============================================
-       完整菜单（分类+网格）
-       ============================================ */
-    .menu-section { background: var(--bg-warm); padding-bottom: 48px; }
-    .category-tabs {
-      display: flex; gap: 8px; padding: 0 20px 20px; overflow-x: auto;
-      scrollbar-width: none; -webkit-overflow-scrolling: touch;
-    }
-    .category-tabs::-webkit-scrollbar { display: none; }
-    .category-tab {
-      flex: 0 0 auto; padding: 8px 18px; border-radius: 24px;
-      font-size: 13px; color: var(--text-light); background: white;
-      border: 1px solid transparent; cursor: pointer; transition: var(--transition);
-      letter-spacing: 1px; font-family: 'Noto Serif SC', serif;
-    }
-    .category-tab.active {
-      background: var(--accent); color: white; border-color: var(--accent);
-    }
-    .category-tab:not(.active):active { background: var(--bg); }
+    /* ========== 完整菜单网格 ========== */
+    .menu-sec { background:var(--bg-warm); padding-bottom:44px; }
+    .menu-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; padding:0 20px; max-width:480px; margin:0 auto; }
+    .menu-card { background:white; border-radius:var(--radius-sm); padding:12px; box-shadow:0 2px 8px var(--shadow); cursor:pointer; transition:var(--tr); position:relative; }
+    .menu-card:active { transform:scale(.96); }
+    .menu-img { width:100%; aspect-ratio:4/3; border-radius:8px; margin-bottom:8px; background:linear-gradient(135deg,#EDE6D6,#D4C8B0); position:relative; overflow:hidden; }
+    .menu-img::before { content:attr(data-char); position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:'Ma Shan Zheng',cursive; font-size:36px; color:rgba(139,26,26,.05); }
+    .menu-tag { position:absolute; top:5px; left:5px; font-size:8px; padding:2px 6px; border-radius:4px; color:white; letter-spacing:1px; }
+    .menu-tag.hot { background:var(--accent); } .menu-tag.new { background:#5A7D5A; } .menu-tag.pick { background:var(--gold); }
+    .menu-name { font-family:'Ma Shan Zheng',cursive; font-size:15px; color:var(--accent); }
+    .menu-price { font-size:12px; color:var(--gold); font-weight:600; margin-top:2px; }
+    .menu-brief { font-size:10px; color:var(--text-light); margin-top:3px; line-height:1.5; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
 
-    .menu-grid {
-      display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
-      padding: 0 20px; max-width: 480px; margin: 0 auto;
-    }
-    .menu-item {
-      background: white; border-radius: var(--radius-sm); padding: 14px;
-      box-shadow: 0 2px 8px var(--shadow); transition: var(--transition);
-      cursor: pointer; position: relative; overflow: hidden;
-    }
-    .menu-item:active { transform: scale(0.97); }
-    .menu-item-img {
-      width: 100%; aspect-ratio: 4/3; border-radius: 8px; margin-bottom: 10px;
-      background: linear-gradient(135deg, #EDE6D6, #D4C8B0);
-      position: relative; overflow: hidden;
-    }
-    .menu-item-img::before {
-      content: attr(data-char); position: absolute; inset: 0;
-      display: flex; align-items: center; justify-content: center;
-      font-family: 'Ma Shan Zheng', cursive; font-size: 40px; color: rgba(139,26,26,0.06);
-    }
-    .menu-item-tag {
-      position: absolute; top: 6px; left: 6px;
-      font-size: 9px; padding: 2px 6px; border-radius: 4px; color: white; letter-spacing: 1px;
-    }
-    .menu-item-tag.spicy { background: var(--accent); }
-    .menu-item-tag.must { background: var(--gold); }
-    .menu-item-tag.new { background: #5A7D5A; }
-    .menu-item-name { font-family: 'Ma Shan Zheng', cursive; font-size: 16px; color: var(--accent); }
-    .menu-item-price { font-size: 13px; color: var(--gold); font-weight: 600; margin-top: 2px; }
-    .menu-item-desc { font-size: 11px; color: var(--text-light); margin-top: 4px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    /* ========== 楚韵故事 ========== */
+    .story-sec { padding-bottom:44px; }
+    .story-scroll { display:flex; overflow-x:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; gap:14px; padding:0 20px 10px; scrollbar-width:none; }
+    .story-scroll::-webkit-scrollbar { display:none; }
+    .story-card { flex:0 0 85%; max-width:310px; scroll-snap-align:center; background:white; border-radius:var(--radius); padding:22px; box-shadow:0 2px 12px var(--shadow); position:relative; overflow:hidden; cursor:pointer; transition:var(--tr); }
+    .story-card:active { transform:scale(.97); }
+    .story-card::before { content:''; position:absolute; top:0; left:0; width:3px; height:100%; background:var(--accent); }
+    .story-num { position:absolute; top:14px; right:18px; font-family:'Ma Shan Zheng',cursive; font-size:32px; color:rgba(139,26,26,.05); }
+    .story-card h4 { font-family:'Ma Shan Zheng',cursive; font-size:17px; color:var(--accent); margin-bottom:8px; letter-spacing:2px; }
+    .story-card p { font-size:12px; color:var(--text-light); line-height:1.8; }
+    .story-hint { text-align:center; font-size:10px; color:var(--gold); letter-spacing:2px; margin-top:6px; }
 
-    /* ============================================
-       品牌故事（三列卡片）
-       ============================================ */
-    .story-section { padding-bottom: 48px; }
-    .story-cards {
-      display: flex; overflow-x: auto; scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch; gap: 14px;
-      padding: 0 20px 8px; scrollbar-width: none;
-    }
-    .story-cards::-webkit-scrollbar { display: none; }
-    .story-card {
-      flex: 0 0 82%; max-width: 300px; scroll-snap-align: center;
-      background: white; border-radius: var(--radius);
-      padding: 24px; box-shadow: 0 2px 12px var(--shadow);
-      position: relative; overflow: hidden;
-    }
-    .story-card::before {
-      content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%;
-      background: var(--accent);
-    }
-    .story-card h4 {
-      font-family: 'Ma Shan Zheng', cursive; font-size: 18px; color: var(--accent);
-      margin-bottom: 10px; letter-spacing: 2px;
-    }
-    .story-card p {
-      font-size: 13px; color: var(--text-light); line-height: 1.8;
-    }
-    .story-card .story-num {
-      position: absolute; top: 16px; right: 20px;
-      font-family: 'Ma Shan Zheng', cursive; font-size: 36px; color: rgba(139,26,26,0.06);
-      line-height: 1;
-    }
+    /* ========== 留言墙 ========== */
+    .wall-sec { background:var(--bg-warm); padding-bottom:44px; }
+    .wall-box { margin:0 20px; background:white; border-radius:var(--radius); padding:20px; box-shadow:0 2px 12px var(--shadow); max-width:480px; margin-left:auto; margin-right:auto; }
+    .wall-title { font-family:'Ma Shan Zheng',cursive; font-size:16px; color:var(--accent); letter-spacing:2px; margin-bottom:12px; }
+    .wall-form { display:flex; gap:8px; margin-bottom:14px; }
+    .wall-input { flex:1; padding:10px 14px; border:1px solid rgba(139,26,26,.1); border-radius:var(--radius-sm); font-size:12px; font-family:'Noto Serif SC',serif; background:var(--bg); color:var(--text); outline:none; }
+    .wall-input::placeholder { color:var(--text-light); opacity:.6; }
+    .wall-btn { padding:10px 18px; background:var(--accent); color:white; border:none; border-radius:var(--radius-sm); font-size:12px; letter-spacing:1px; cursor:pointer; font-family:'Noto Serif SC',serif; }
+    .wall-btn:active { background:var(--accent-light); }
+    .wall-list { max-height:160px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; }
+    .wall-item { background:var(--bg); padding:10px 14px; border-radius:8px; font-size:11px; color:var(--text-light); line-height:1.6; border-left:2px solid var(--gold); }
+    .wall-item .wall-time { font-size:9px; color:var(--gold); margin-top:4px; }
+    .wall-empty { text-align:center; font-size:11px; color:var(--text-light); padding:16px; opacity:.6; }
 
-    /* ============================================
-       门店氛围
-       ============================================ */
-    .vibe-section { background: var(--bg-warm); padding-bottom: 48px; }
-    .vibe-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
-      padding: 0 20px; max-width: 480px; margin: 0 auto;
-    }
-    .vibe-item {
-      aspect-ratio: 1; border-radius: var(--radius-sm); overflow: hidden;
-      background: linear-gradient(135deg, #E0D6C2, #C8BAA0);
-      position: relative; display: flex; align-items: center; justify-content: center;
-    }
-    .vibe-item:nth-child(3) { grid-column: span 2; aspect-ratio: 16/9; }
-    .vibe-item span {
-      font-family: 'Ma Shan Zheng', cursive; font-size: 24px; color: rgba(139,26,26,0.1);
-      letter-spacing: 4px;
-    }
-    .vibe-item .vibe-label {
-      position: absolute; bottom: 8px; left: 10px;
-      font-size: 10px; color: var(--text-light); background: rgba(245,240,232,0.9);
-      padding: 2px 8px; border-radius: 4px; letter-spacing: 1px;
-    }
+    /* ========== 店内氛围 ========== */
+    .vibe-sec { padding-bottom:44px; }
+    .vibe-scroll { display:flex; overflow-x:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; gap:10px; padding:0 20px 10px; scrollbar-width:none; }
+    .vibe-scroll::-webkit-scrollbar { display:none; }
+    .vibe-card { flex:0 0 72%; max-width:260px; scroll-snap-align:center; border-radius:var(--radius-sm); overflow:hidden; position:relative; cursor:pointer; transition:var(--tr); }
+    .vibe-card:active { transform:scale(.97); }
+    .vibe-img { width:100%; aspect-ratio:4/3; background:linear-gradient(135deg,#E0D6C2,#C8BAA0); display:flex; align-items:center; justify-content:center; position:relative; }
+    .vibe-img span { font-family:'Ma Shan Zheng',cursive; font-size:22px; color:rgba(139,26,26,.08); letter-spacing:3px; }
+    .vibe-label { position:absolute; bottom:8px; left:10px; font-size:10px; color:var(--text-light); background:rgba(245,240,232,.92); padding:3px 10px; border-radius:4px; letter-spacing:1px; }
+    .vibe-info { padding:10px; background:white; }
+    .vibe-info h5 { font-size:13px; color:var(--accent); font-weight:600; }
+    .vibe-info p { font-size:10px; color:var(--text-light); margin-top:2px; }
 
-    /* ============================================
-       门店信息
-       ============================================ */
-    .store-section { padding-bottom: 48px; }
-    .store-card {
-      background: var(--bg-dark); color: var(--text-white); border-radius: var(--radius);
-      margin: 0 20px; padding: 32px 24px; position: relative; overflow: hidden;
-      max-width: 440px; margin-left: auto; margin-right: auto;
-    }
-    .store-card::before {
-      content: ''; position: absolute; top: -40px; right: -40px; width: 120px; height: 120px;
-      border-radius: 50%; border: 1px solid rgba(184,149,106,0.15);
-    }
-    .store-card h3 {
-      font-family: 'Ma Shan Zheng', cursive; font-size: 24px; color: var(--gold-light);
-      letter-spacing: 3px; margin-bottom: 4px;
-    }
-    .store-card .store-branch {
-      font-size: 12px; color: rgba(245,240,232,0.6); letter-spacing: 2px; margin-bottom: 24px;
-    }
-    .store-info-item {
-      display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px;
-    }
-    .store-info-icon {
-      width: 32px; height: 32px; border-radius: 50%; background: rgba(184,149,106,0.15);
-      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-      font-size: 14px; color: var(--gold-light);
-    }
-    .store-info-text { font-size: 13px; line-height: 1.6; color: rgba(245,240,232,0.85); }
-    .store-info-text strong { color: var(--gold-light); font-weight: 600; display: block; margin-bottom: 2px; }
-    .store-actions {
-      display: flex; gap: 10px; margin-top: 24px;
-    }
-    .store-btn {
-      flex: 1; padding: 12px; border-radius: var(--radius-sm); text-align: center;
-      font-size: 13px; letter-spacing: 1px; cursor: pointer; transition: var(--transition);
-      text-decoration: none; font-family: 'Noto Serif SC', serif;
-    }
-    .store-btn.primary {
-      background: var(--accent); color: white; border: none;
-    }
-    .store-btn.primary:active { background: var(--accent-light); }
-    .store-btn.secondary {
-      background: transparent; color: var(--gold-light); border: 1px solid rgba(184,149,106,0.3);
-    }
-    .store-btn.secondary:active { background: rgba(184,149,106,0.1); }
+    /* ========== 到店指引 ========== */
+    .store-sec { padding-bottom:48px; }
+    .store-card { background:var(--bg-dark); color:var(--text-white); border-radius:var(--radius); margin:0 20px; padding:28px 22px; position:relative; overflow:hidden; max-width:460px; margin-left:auto; margin-right:auto; }
+    .store-card::before { content:''; position:absolute; top:-30px; right:-30px; width:100px; height:100px; border-radius:50%; border:1px solid rgba(184,149,106,.12); }
+    .store-card h3 { font-family:'Ma Shan Zheng',cursive; font-size:22px; color:var(--gold-light); letter-spacing:3px; margin-bottom:2px; }
+    .store-branch { font-size:11px; color:rgba(245,240,232,.55); letter-spacing:2px; margin-bottom:20px; }
+    .store-row { display:flex; align-items:flex-start; gap:10px; margin-bottom:12px; }
+    .store-icon { width:30px; height:30px; border-radius:50%; background:rgba(184,149,106,.12); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:13px; }
+    .store-text { font-size:12px; line-height:1.6; color:rgba(245,240,232,.8); }
+    .store-text strong { color:var(--gold-light); font-weight:600; display:block; margin-bottom:1px; font-size:11px; }
+    .store-btns { display:flex; gap:10px; margin-top:20px; }
+    .sbtn { flex:1; padding:11px; border-radius:var(--radius-sm); text-align:center; font-size:12px; letter-spacing:1px; cursor:pointer; transition:var(--tr); text-decoration:none; font-family:'Noto Serif SC',serif; border:none; }
+    .sbtn.red { background:var(--accent); color:white; }
+    .sbtn.red:active { background:var(--accent-light); }
+    .sbtn.ghost { background:transparent; color:var(--gold-light); border:1px solid rgba(184,149,106,.25); }
 
-    /* ============================================
-       页脚
-       ============================================ */
-    .footer {
-      background: var(--bg-dark); color: rgba(245,240,232,0.5);
-      padding: 32px 24px 24px; text-align: center;
-    }
-    .footer-brand {
-      font-family: 'Ma Shan Zheng', cursive; font-size: 20px; color: var(--gold-light);
-      letter-spacing: 3px; margin-bottom: 4px;
-    }
-    .footer-branch { font-size: 11px; letter-spacing: 2px; margin-bottom: 16px; }
-    .footer-qr {
-      width: 100px; height: 100px; margin: 0 auto 12px; background: white; padding: 4px; border-radius: 8px;
-    }
-    .footer-qr-inner {
-      width: 100%; height: 100%; background: var(--bg-warm); border-radius: 4px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 10px; color: var(--text-light);
-    }
-    .footer-tip { font-size: 11px; letter-spacing: 1px; margin-bottom: 16px; }
-    .footer-copy { font-size: 10px; opacity: 0.5; }
+    /* ========== 预约表单 ========== */
+    .booking-form { margin-top:18px; padding-top:18px; border-top:1px solid rgba(184,149,106,.15); }
+    .booking-form h4 { font-family:'Ma Shan Zheng',cursive; font-size:15px; color:var(--gold-light); letter-spacing:2px; margin-bottom:12px; }
+    .form-row { display:flex; gap:8px; margin-bottom:10px; }
+    .form-row input, .form-row select { flex:1; padding:9px 12px; border-radius:var(--radius-sm); border:1px solid rgba(184,149,106,.2); background:rgba(245,240,232,.06); color:var(--text-white); font-size:12px; font-family:'Noto Serif SC',serif; outline:none; }
+    .form-row input::placeholder { color:rgba(245,240,232,.35); }
+    .form-row select { color:rgba(245,240,232,.7); }
+    .form-row select option { background:var(--bg-dark); color:var(--text); }
+    .form-submit { width:100%; padding:11px; background:var(--accent); color:white; border:none; border-radius:var(--radius-sm); font-size:12px; letter-spacing:2px; cursor:pointer; font-family:'Noto Serif SC',serif; margin-top:4px; }
+    .form-submit:active { background:var(--accent-light); }
 
-    /* ============================================
-       返回顶部
-       ============================================ */
-    .back-top {
-      position: fixed; bottom: 20px; right: 20px; z-index: 50;
-      width: 44px; height: 44px; border-radius: 50%;
-      background: var(--accent); color: white; border: none;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 18px; cursor: pointer; opacity: 0; transform: translateY(20px);
-      transition: var(--transition); box-shadow: 0 4px 12px rgba(139,26,26,0.3);
-    }
-    .back-top.visible { opacity: 1; transform: translateY(0); }
-    .back-top:active { transform: scale(0.92); }
+    /* ========== 侧边栏 ========== */
+    .side-fab { position:fixed; bottom:80px; right:14px; z-index:90; display:flex; flex-direction:column; gap:10px; }
+    .fab { width:44px; height:44px; border-radius:50%; border:none; background:var(--accent); color:white; font-size:18px; cursor:pointer; box-shadow:0 4px 14px rgba(139,26,26,.25); display:flex; align-items:center; justify-content:center; transition:var(--tr); }
+    .fab:active { transform:scale(.9); }
+    .fab.gold { background:var(--gold); box-shadow:0 4px 14px rgba(184,149,106,.3); }
+    .fab-tip { position:absolute; right:52px; top:50%; transform:translateY(-50%); white-space:nowrap; background:var(--bg-dark); color:var(--gold-light); font-size:10px; padding:4px 10px; border-radius:6px; opacity:0; pointer-events:none; transition:opacity .2s; }
+    .fab:hover .fab-tip { opacity:1; }
 
-    /* ============================================
-       背景漂浮字（更 subtle）
-       ============================================ */
-    .bg-float {
-      position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
-    }
-    .bg-float span {
-      position: absolute; font-family: 'Ma Shan Zheng', cursive;
-      font-size: clamp(40px, 12vw, 72px); color: var(--accent); opacity: 0.025;
-      animation: bgFloat 12s ease-in-out infinite;
-    }
-    .bg-float span:nth-child(1) { top: 10%; left: 8%; animation-delay: 0s; }
-    .bg-float span:nth-child(2) { top: 35%; right: 5%; animation-delay: 3s; font-size: clamp(32px, 9vw, 56px); }
-    .bg-float span:nth-child(3) { top: 60%; left: 5%; animation-delay: 6s; font-size: clamp(48px, 14vw, 80px); }
-    .bg-float span:nth-child(4) { top: 80%; right: 10%; animation-delay: 9s; }
-    @keyframes bgFloat {
-      0%, 100% { opacity: 0.015; transform: translateY(0); }
-      50% { opacity: 0.04; transform: translateY(-12px); }
-    }
+    /* ========== 页脚 ========== */
+    .footer { background:var(--bg-dark); color:rgba(245,240,232,.45); padding:28px 20px 20px; text-align:center; }
+    .footer-brand { font-family:'Ma Shan Zheng',cursive; font-size:18px; color:var(--gold-light); letter-spacing:3px; }
+    .footer-branch { font-size:10px; letter-spacing:2px; margin-bottom:12px; }
+    .footer-qr { width:90px; height:90px; margin:0 auto 10px; background:white; padding:3px; border-radius:8px; }
+    .footer-qr-inner { width:100%; height:100%; background:var(--bg-warm); border-radius:5px; display:flex; align-items:center; justify-content:center; font-size:9px; color:var(--text-light); }
+    .footer-copy { font-size:9px; opacity:.5; margin-top:10px; }
+
+    /* ========== 返回顶部 ========== */
+    .backtop { position:fixed; bottom:20px; right:14px; z-index:90; width:44px; height:44px; border-radius:50%; background:var(--accent); color:white; border:none; display:flex; align-items:center; justify-content:center; font-size:16px; cursor:pointer; opacity:0; transform:translateY(20px); transition:var(--tr); box-shadow:0 4px 12px rgba(139,26,26,.25); }
+    .backtop.show { opacity:1; transform:translateY(0); }
+    .backtop:active { transform:scale(.9); }
   </style>
 </head>
 <body>
 
-  <!-- 加载动画 -->
+  <!-- 加载 -->
   <div class="loading" id="loading">
     <div class="loading-brand">楚韵</div>
     <div class="loading-line"></div>
-    <div class="loading-text">公园路店</div>
+    <div class="loading-sub">荆楚非遗乡情</div>
   </div>
 
-  <!-- 背景漂浮字 -->
-  <div class="bg-float">
-    <span>鲜</span><span>蒸</span><span>煨</span><span>情</span>
-  </div>
+  <!-- 漂浮字 -->
+  <div class="bg-float"><span>鲜</span><span>蒸</span><span>煨</span><span>情</span></div>
 
-  <!-- 导航栏 -->
+  <!-- 导航 -->
   <nav class="navbar" id="navbar">
     <div class="navbar-brand">楚韵</div>
     <div class="navbar-tag">公园路店</div>
   </nav>
 
-  <!-- 首屏 Hero -->
+  <!-- 弹窗 -->
+  <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+    <div class="modal-box" id="modalBox" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <!-- 首屏 -->
   <section class="hero" id="hero">
     <div class="hero-bg"></div>
+    <div class="hero-ring"></div>
+    <div class="hero-ring"></div>
     <div class="hero-pot">
-      <span>煨</span>
-      <span>一锅煨尽楚乡情</span>
+      <span class="pot-char">煨</span>
+      <span class="pot-text">一锅煨尽楚乡情</span>
     </div>
     <div class="hero-content">
-      <h1 class="hero-title">楚韵农家菜</h1>
-      <p class="hero-branch">公园路店</p>
-      <p class="hero-slogan">不时不食 · 本味楚乡</p>
-      <div class="hero-divider"></div>
+      <h1 class="hero-verse">千湖之味 一脉楚香</h1>
+      <p class="hero-verse-sub">不时不食 · 本味楚乡</p>
+      <p class="hero-branch">楚韵农家菜 · 公园路店</p>
+      <div class="hero-btns">
+        <a class="hero-btn primary" href="#menu">寻味菜单</a>
+        <a class="hero-btn ghost" href="#store">预约私宴</a>
+      </div>
     </div>
     <div class="hero-scroll" onclick="document.getElementById('featured').scrollIntoView({behavior:'smooth'})">
-      <span>探索菜单</span>
-      <div class="arrow"></div>
+      <span>向下滑动</span><div class="arrow"></div>
     </div>
   </section>
 
-  <!-- 招牌推荐 -->
-  <section class="featured-section" id="featured">
-    <div class="section-header reveal">
-      <p class="section-tag">SIGNATURE</p>
-      <h2 class="section-title">招牌必点</h2>
-      <div class="section-line"></div>
-      <p class="section-desc">六道传承楚菜，来自千湖之省的地道风味</p>
+  <!-- 滚动导视 -->
+  <div class="guide-bar">
+    <div class="guide-track">
+      <span class="guide-text">寻味楚菜 &nbsp;·&nbsp; 溯源江汉 &nbsp;·&nbsp; 守艺蒸煨 &nbsp;·&nbsp; 聚情乡宴 &nbsp;·&nbsp;</span>
+      <span class="guide-text">寻味楚菜 &nbsp;·&nbsp; 溯源江汉 &nbsp;·&nbsp; 守艺蒸煨 &nbsp;·&nbsp; 聚情乡宴 &nbsp;·&nbsp;</span>
+    </div>
+  </div>
+
+  <!-- 招牌必点 -->
+  <section class="featured" id="featured">
+    <div class="sec-head reveal">
+      <p class="sec-tag">SIGNATURE</p>
+      <h2 class="sec-title">招牌必点</h2>
+      <div class="sec-line"></div>
+      <p class="sec-desc">六道传承楚菜，来自千湖之省的地道风味</p>
     </div>
     <div class="featured-scroll" id="featuredScroll"></div>
   </section>
 
-  <!-- 完整菜单 -->
-  <section class="menu-section" id="menu">
-    <div class="section-header reveal">
-      <p class="section-tag">MENU</p>
-      <h2 class="section-title">楚韵菜单</h2>
-      <div class="section-line"></div>
-      <p class="section-desc">三蒸九扣十大碗，不上蒸笼不成席</p>
+  <!-- 楚韵菜单 -->
+  <section class="menu-sec" id="menu">
+    <div class="sec-head reveal">
+      <p class="sec-tag">MENU</p>
+      <h2 class="sec-title">楚韵菜单</h2>
+      <div class="sec-line"></div>
+      <p class="sec-desc">三蒸九扣十大碗，不上蒸笼不成席</p>
     </div>
-    <div class="category-tabs" id="categoryTabs"></div>
+    <div class="cat-tabs" id="catTabs"></div>
     <div class="menu-grid" id="menuGrid"></div>
   </section>
 
-  <!-- 品牌故事 -->
-  <section class="story-section" id="story">
-    <div class="section-header reveal">
-      <p class="section-tag">HERITAGE</p>
-      <h2 class="section-title">楚韵故事</h2>
-      <div class="section-line"></div>
+  <!-- 楚韵故事 -->
+  <section class="story-sec" id="story">
+    <div class="sec-head reveal">
+      <p class="sec-tag">HERITAGE</p>
+      <h2 class="sec-title">楚韵故事</h2>
+      <div class="sec-line"></div>
+      <p class="sec-desc">溯源守艺聚情，一碗一箸皆楚风</p>
     </div>
-    <div class="story-cards" id="storyCards"></div>
+    <div class="story-scroll" id="storyScroll"></div>
+    <p class="story-hint">点击卡片查看荆楚文化注解</p>
   </section>
 
-  <!-- 门店氛围 -->
-  <section class="vibe-section" id="vibe">
-    <div class="section-header reveal">
-      <p class="section-tag">ATMOSPHERE</p>
-      <h2 class="section-title">店内氛围</h2>
-      <div class="section-line"></div>
-      <p class="section-desc">大包房、圆桌宴，宝鸡乡党聚会的首选</p>
+  <!-- 留言墙 -->
+  <section class="wall-sec" id="wall">
+    <div class="sec-head reveal">
+      <p class="sec-tag">VOICES</p>
+      <h2 class="sec-title">乡情留言</h2>
+      <div class="sec-line"></div>
+      <p class="sec-desc">身在宝鸡，心系江汉，写下您的楚乡记忆</p>
     </div>
-    <div class="vibe-grid" id="vibeGrid"></div>
+    <div class="wall-box reveal">
+      <div class="wall-title">留一纸乡音</div>
+      <div class="wall-form">
+        <input class="wall-input" id="wallInput" placeholder="写下您的异乡湖北乡情故事..." maxlength="80">
+        <button class="wall-btn" onclick="addWall()">留言</button>
+      </div>
+      <div class="wall-list" id="wallList"></div>
+    </div>
   </section>
 
-  <!-- 门店信息 -->
-  <section class="store-section" id="store">
-    <div class="section-header reveal">
-      <p class="section-tag">VISIT US</p>
-      <h2 class="section-title">到店指引</h2>
-      <div class="section-line"></div>
+  <!-- 店内氛围 -->
+  <section class="vibe-sec" id="vibe">
+    <div class="sec-head reveal">
+      <p class="sec-tag">ATMOSPHERE</p>
+      <h2 class="sec-title">店内氛围</h2>
+      <div class="sec-line"></div>
+      <p class="sec-desc">大包房、圆桌宴，宝鸡乡党聚会的首选</p>
+    </div>
+    <div class="vibe-scroll" id="vibeScroll"></div>
+  </section>
+
+  <!-- 到店指引 -->
+  <section class="store-sec" id="store">
+    <div class="sec-head reveal">
+      <p class="sec-tag">VISIT US</p>
+      <h2 class="sec-title">到店指引</h2>
+      <div class="sec-line"></div>
     </div>
     <div class="store-card reveal">
       <h3>楚韵农家菜</h3>
       <p class="store-branch">公园路店</p>
-      <div class="store-info-item">
-        <div class="store-info-icon">📍</div>
-        <div class="store-info-text">
-          <strong>地址</strong>
-          宝鸡市公园路（具体门牌号请致电确认）
-        </div>
+      <div class="store-row"><div class="store-icon">📍</div><div class="store-text"><strong>地址</strong>宝鸡市公园路（具体门牌号请致电确认）</div></div>
+      <div class="store-row"><div class="store-icon">📞</div><div class="store-text"><strong>预订电话</strong>请致电门店预订包房（电话待补充）</div></div>
+      <div class="store-row"><div class="store-icon">🕐</div><div class="store-text"><strong>营业时间</strong>午餐 11:00-14:00 / 晚餐 17:00-21:00</div></div>
+      <div class="store-row"><div class="store-icon">🍽</div><div class="store-text"><strong>特色服务</strong>大包房可预订 · 湖北食材直运 · 承接宴席</div></div>
+      <div class="store-btns">
+        <a class="sbtn red" href="tel:请补充电话" onclick="if(this.href.includes('请补充')){alert('请先在代码中补充门店电话');return false;}">📞 电话预订</a>
+        <a class="sbtn ghost" href="https://map.baidu.com/search/宝鸡公园路楚韵农家菜" target="_blank">🧭 导航到店</a>
       </div>
-      <div class="store-info-item">
-        <div class="store-info-icon">📞</div>
-        <div class="store-info-text">
-          <strong>预订电话</strong>
-          请致电门店预订包房（电话待补充）
+      <div class="booking-form">
+        <h4>包房预约</h4>
+        <div class="form-row">
+          <input type="date" id="bookDate">
+          <select id="bookTime">
+            <option value="">选择时段</option>
+            <option>午餐 11:00</option><option>午餐 12:00</option>
+            <option>晚餐 17:00</option><option>晚餐 18:00</option><option>晚餐 19:00</option>
+          </select>
         </div>
-      </div>
-      <div class="store-info-item">
-        <div class="store-info-icon">🕐</div>
-        <div class="store-info-text">
-          <strong>营业时间</strong>
-          午餐 11:00 - 14:00 / 晚餐 17:00 - 21:00
+        <div class="form-row">
+          <select id="bookPeople">
+            <option value="">聚餐人数</option>
+            <option>2-4人</option><option>5-8人</option><option>9-12人</option><option>12人以上</option>
+          </select>
+          <input type="text" id="bookPhone" placeholder="联系电话">
         </div>
-      </div>
-      <div class="store-info-item">
-        <div class="store-info-icon">🍽</div>
-        <div class="store-info-text">
-          <strong>特色服务</strong>
-          大包房可预订 · 湖北食材直运 · 承接宴席
-        </div>
-      </div>
-      <div class="store-actions">
-        <a class="store-btn primary" href="tel:请补充电话" onclick="alert('请先在代码中补充门店电话')">📞 电话预订</a>
-        <a class="store-btn secondary" href="https://map.baidu.com/search/宝鸡公园路楚韵农家菜" target="_blank">🧭 导航到店</a>
+        <button class="form-submit" onclick="submitBooking()">提交预约</button>
       </div>
     </div>
   </section>
 
   <!-- 页脚 -->
-  <footer class="footer" id="footer">
+  <footer class="footer">
     <div class="footer-brand">楚韵农家菜</div>
     <div class="footer-branch">公园路店</div>
-    <div class="footer-qr">
-      <div class="footer-qr-inner">扫码<br>看菜单</div>
-    </div>
-    <div class="footer-tip">本店食材定期从湖北直运，保证地道楚味</div>
+    <div class="footer-qr"><div class="footer-qr-inner">扫码<br>看菜单</div></div>
     <div class="footer-copy"> 楚韵农家菜（公园路店）· 保留所有权利</div>
   </footer>
 
+  <!-- 侧边栏 -->
+  <div class="side-fab">
+    <button class="fab" onclick="randomTip()" title="楚菜小知识">📖</button>
+    <button class="fab gold" onclick="document.getElementById('store').scrollIntoView({behavior:'smooth'})" title="预约私宴">🍽</button>
+  </div>
+
   <!-- 返回顶部 -->
-  <button class="back-top" id="backTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+  <button class="backtop" id="backTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
 
   <script>
-    /* ============================================
-       数据配置（可在此修改菜品、价格、故事等）
-       ============================================ */
+    /* ========== 数据配置 ========== */
     const DATA = {
       featured: [
-        { name: '筒子骨莲藕汤', char: '藕', price: '88', unit: '份', badge: '镇店招牌', story: '一锅煨尽楚乡情，粉藕从湖北洪湖直运，文火慢炖四小时。' },
-        { name: '沔阳三蒸', char: '蒸', price: '68', unit: '份', badge: '非遗技艺', story: '传承六百年的沔阳蒸菜，粉蒸肉、蒸鱼、蒸蔬菜，软糯鲜香。' },
-        { name: '霸王鱼头', char: '鱼', price: '128', unit: '份', badge: '必点推荐', story: '江湖豪情炖一锅，鱼头来自丹江口水库，鲜辣入味。' },
+        { name:'筒子骨莲藕汤', char:'藕', price:'88', unit:'份', badge:'镇店招牌', story:'一锅煨尽楚乡情，粉藕从湖北洪湖直运，文火慢炖四小时，汤色奶白如玉。', detail:'精选洪湖九孔粉藕，搭配土猪筒子骨，经四小时文火慢煨。藕断丝连，汤色奶白，入口即化。此汤为楚菜之魂，每逢宴席必上首位。', pair:'配米饭或馒头，宜佐以泥蒿炒腊肉', review:'【食客】宝鸡老李：喝完这碗汤，仿佛回到武汉外婆家。' },
+        { name:'沔阳三蒸', char:'蒸', price:'68', unit:'份', badge:'非遗技艺', story:'传承六百年的沔阳蒸菜，粉蒸肉、蒸鱼、蒸蔬菜，三味一体，软糯鲜香。', detail:'沔阳三蒸为湖北省非物质文化遗产。米粉以五香调味，裹于肉、鱼、蔬菜之上，入笼蒸至软糯。三味并呈，一笼见乾坤。', pair:'配清炒时蔬，宜佐米酒汤圆', review:'【食客】小张同学：粉蒸肉入口即化，非遗名不虚传！' },
+        { name:'霸王鱼头', char:'鱼', price:'128', unit:'份', badge:'必点推荐', story:'江湖豪情炖一锅，丹江口水库鱼头，鲜辣入味，一箸入魂。', detail:'甄选丹江口水库五年生花鲢鱼头，以楚地秘传辣酱炖煮。鱼头胶质丰盈，辣而不燥，尽显荆楚江湖豪情。', pair:'配米饭或面条，宜佐卤藕拌豆干', review:'【食客】王老板：鱼头之大，一桌放不下，鲜味十足！' },
       ],
       categories: [
-        { id: 'steam', name: '蒸菜' },
-        { id: 'stew', name: '煨菜' },
-        { id: 'river', name: '河鲜' },
-        { id: 'fry', name: '小炒' },
-        { id: 'snack', name: '小吃' },
+        { id:'steam', name:'蒸蒸日上' }, { id:'stew', name:'煨汤养人' },
+        { id:'river', name:'江湖河鲜' }, { id:'fry', name:'农家小炒' }, { id:'snack', name:'荆楚小食' },
       ],
       menu: {
         steam: [
-          { name: '沔阳三蒸', char: '蒸', price: '68', tag: '非遗', tagClass: 'must', desc: '粉蒸肉、蒸鱼、蒸蔬菜，三味一体' },
-          { name: '珍珠丸子', char: '珠', price: '48', tag: '必点', tagClass: 'must', desc: '糯米包裹鲜肉，蒸至晶莹剔透' },
-          { name: '蒸茼蒿', char: '茼', price: '28', tag: '时令', tagClass: 'new', desc: '春日时蔬，清淡解腻' },
-          { name: '粉蒸排骨', char: '排', price: '58', tag: '招牌', tagClass: 'must', desc: '湖北五香米粉裹排骨，软糯脱骨' },
+          { name:'沔阳三蒸', char:'蒸', price:'68', tag:'非遗', tagCls:'hot', brief:'粉蒸肉、蒸鱼、蒸蔬菜，三味一体' },
+          { name:'珍珠丸子', char:'珠', price:'48', tag:'必点', tagCls:'pick', brief:'糯米裹鲜肉，蒸至晶莹剔透' },
+          { name:'蒸茼蒿', char:'茼', price:'28', tag:'时令', tagCls:'new', brief:'春日时蔬，清淡解腻' },
+          { name:'粉蒸排骨', char:'排', price:'58', tag:'招牌', tagCls:'hot', brief:'五香米粉裹排骨，软糯脱骨' },
         ],
         stew: [
-          { name: '筒子骨莲藕汤', char: '藕', price: '88', tag: '镇店', tagClass: 'must', desc: '洪湖粉藕，煨至汤色奶白' },
-          { name: '湖塘甲鱼煲', char: '甲', price: '168', tag: '滋补', tagClass: 'must', desc: '江汉平原野生甲鱼，温补养生' },
-          { name: '腊肉炖鳝鱼', char: '鳝', price: '98', tag: '招牌', tagClass: 'spicy', desc: '农家腊肉配土鳝，汤浓味厚' },
+          { name:'筒子骨莲藕汤', char:'藕', price:'88', tag:'镇店', tagCls:'hot', brief:'洪湖粉藕，煨至汤色奶白' },
+          { name:'湖塘甲鱼煲', char:'甲', price:'168', tag:'滋补', tagCls:'pick', brief:'江汉野生甲鱼，温补养生' },
+          { name:'腊肉炖鳝鱼', char:'鳝', price:'98', tag:'招牌', tagCls:'hot', brief:'农家腊肉配土鳝，汤浓味厚' },
         ],
         river: [
-          { name: '霸王鱼头', char: '鱼', price: '128', tag: '必点', tagClass: 'must', desc: '丹江口水库鱼头，鲜辣入魂' },
-          { name: '清蒸武昌鱼', char: '武', price: '78', tag: '经典', tagClass: 'must', desc: '毛主席诗中的名鱼，肉质细嫩' },
-          { name: '干煸泥鳅', char: '鳅', price: '52', tag: '下酒', tagClass: 'spicy', desc: '外酥里嫩，佐酒佳品' },
-          { name: '蒜蓉粉丝蒸扇贝', char: '贝', price: '68', tag: '新品', tagClass: 'new', desc: '蒜香浓郁，粉丝吸汁' },
+          { name:'霸王鱼头', char:'鱼', price:'128', tag:'必点', tagCls:'hot', brief:'丹江口鱼头，鲜辣入魂' },
+          { name:'清蒸武昌鱼', char:'武', price:'78', tag:'经典', tagCls:'pick', brief:'毛主席诗中名鱼，肉质细嫩' },
+          { name:'干煸泥鳅', char:'鳅', price:'52', tag:'下酒', tagCls:'hot', brief:'外酥里嫩，佐酒佳品' },
+          { name:'蒜蓉粉丝扇贝', char:'贝', price:'68', tag:'新品', tagCls:'new', brief:'蒜香浓郁，粉丝吸汁' },
         ],
         fry: [
-          { name: '泥蒿炒腊肉', char: '蒿', price: '42', tag: '时令', tagClass: 'new', desc: '湖畔清香，时间的风味' },
-          { name: '干锅手撕包菜', char: '包', price: '32', tag: '家常', tagClass: 'spicy', desc: '手撕包菜干锅爆炒，脆爽下饭' },
-          { name: '农家小炒肉', char: '肉', price: '38', tag: '必点', tagClass: 'spicy', desc: '五花肉配青椒，经典湘鄂口味' },
-          { name: '酸辣土豆丝', char: '丝', price: '22', tag: '经典', tagClass: 'spicy', desc: '酸辣开胃，桌桌必点' },
+          { name:'泥蒿炒腊肉', char:'蒿', price:'42', tag:'时令', tagCls:'new', brief:'湖畔清香，时间的风味' },
+          { name:'干锅手撕包菜', char:'包', price:'32', tag:'家常', tagCls:'hot', brief:'干锅爆炒，脆爽下饭' },
+          { name:'农家小炒肉', char:'肉', price:'38', tag:'必点', tagCls:'hot', brief:'五花肉配青椒，经典湘鄂味' },
+          { name:'酸辣土豆丝', char:'丝', price:'22', tag:'经典', tagCls:'hot', brief:'酸辣开胃，桌桌必点' },
         ],
         snack: [
-          { name: '卤藕拌豆干', char: '卤', price: '18', tag: '地道', tagClass: 'must', desc: '最地道的荆楚街头味道' },
-          { name: '炸藕夹', char: '夹', price: '28', tag: '小吃', tagClass: 'must', desc: '藕片夹肉，外酥里嫩' },
-          { name: '米酒汤圆', char: '酒', price: '16', tag: '甜品', tagClass: 'new', desc: '湖北孝感米酒，温润甜糯' },
-          { name: '热干面', char: '面', price: '12', tag: '经典', tagClass: 'must', desc: '武汉名片，芝麻酱香浓' },
+          { name:'卤藕拌豆干', char:'卤', price:'18', tag:'地道', tagCls:'pick', brief:'最地道的荆楚街头味道' },
+          { name:'炸藕夹', char:'夹', price:'28', tag:'小吃', tagCls:'hot', brief:'藕片夹肉，外酥里嫩' },
+          { name:'米酒汤圆', char:'酒', price:'16', tag:'甜品', tagCls:'new', brief:'孝感米酒，温润甜糯' },
+          { name:'热干面', char:'面', price:'12', tag:'经典', tagCls:'pick', brief:'武汉名片，芝麻酱香浓' },
         ],
       },
       stories: [
-        { title: '源于江汉', num: '壹', desc: '我们来自千湖之省，鱼米之乡。店里的核心食材，从粉藕到红菜苔，都定期从湖北直运宝鸡，只为一口地道。' },
-        { title: '守于蒸煨', num: '贰', desc: '"三蒸九扣十大碗，不上蒸笼不成席"。我们坚守古法，用时间和火候，为您还原食物最本真的味道。' },
-        { title: '聚于人情', num: '叁', desc: '我们的大包房，见证了无数宝鸡乡党的欢聚时刻。这里有酒，有故事，等您来把这张墙填满。' },
+        { title:'源于江汉', num:'壹', verse:'千湖之省，鱼米之乡', desc:'我们来自千湖之省，鱼米之乡。店里的核心食材，从粉藕到红菜苔，都定期从湖北直运宝鸡，只为一口地道。', lore:'【江汉平原】古称"云梦泽"，湖泊星罗棋布，水网纵横。这里出产的莲藕以"九孔粉藕"闻名，淀粉含量高，煨汤后绵软拉丝，是楚菜之魂。' },
+        { title:'守于蒸煨', num:'贰', verse:'三蒸九扣，火候为纲', desc:'"三蒸九扣十大碗，不上蒸笼不成席"。我们坚守古法，用时间和火候，为您还原食物最本真的味道。', lore:'【沔阳三蒸】始于元代，盛于明清。以米粉拌五香，裹于食材之上，入竹笼以武火蒸之。蒸菜锁鲜，原汁原味，是楚菜独有的温柔。' },
+        { title:'聚于人情', num:'叁', verse:'一席乡宴，满座温情', desc:'我们的大包房，见证了无数宝鸡乡党的欢聚时刻。这里有酒，有故事，等您来把这张墙填满。', lore:'【楚宴文化】楚人重情，以宴传情。"无酒不成席，无鱼不成宴"。一桌楚菜，是乡愁的解药，也是人情味的容器。' },
       ],
       vibes: [
-        { label: '大厅散台', text: '宽敞明亮' },
-        { label: '雅致包房', text: '私密聚会' },
-        { label: '楚韵味道', text: '食材直运' },
+        { label:'大厅散台', title:'宽敞明亮', desc:'大厅可容纳40人同时就餐，适合家庭聚餐、朋友小聚。', capacity:'40人', scene:'家庭聚餐、朋友小聚' },
+        { label:'雅致包房', title:'私密聚会', desc:'独立包房6-12人不等，配备茶台与沙发，商务宴请首选。', capacity:'6-12人', scene:'商务宴请、生日宴席' },
+        { label:'大包宴席', title:'圆桌面席', desc:'大包房可容纳20人圆桌，承接婚宴、寿宴、公司团建。', capacity:'20人', scene:'婚宴、寿宴、团建' },
+        { label:'食材明档', title:'新鲜可见', desc:'明档厨房，湖北直运食材现场处理，看得见的安心。', capacity:'—', scene:'所有食客' },
+      ],
+      tips: [
+        '楚菜讲究"不时不食"，莲藕以秋冬为最粉糯。',
+        '沔阳三蒸的米粉需用早稻与五香研磨，蒸时以荷叶垫底。',
+        '煨汤忌大火沸腾，须以文火慢炖，汤色方能奶白。',
+        '湖北人吃鱼讲究"头三尾四"，鱼头对准最尊贵的客人。',
+        '泥蒿只取初春嫩芽，过季则失其清香。',
+        '热干面需"掸面"三遍，碱水面根根分明，拌酱方挂得住。',
       ],
     };
 
-    /* ============================================
-       渲染函数
-       ============================================ */
+    /* ========== 弹窗系统 ========== */
+    const modalOverlay = document.getElementById('modalOverlay');
+    const modalContent = document.getElementById('modalContent');
+    function openModal(html) { modalContent.innerHTML = html; modalOverlay.classList.add('active'); document.body.style.overflow = 'hidden'; }
+    function closeModal(e) { if(e && e.target !== modalOverlay && e.target.closest('.modal-close')===null) return; modalOverlay.classList.remove('active'); document.body.style.overflow = ''; }
+
+    /* ========== 渲染 ========== */
     function render() {
       // 招牌推荐
-      const featuredScroll = document.getElementById('featuredScroll');
-      DATA.featured.forEach((item, i) => {
-        const card = document.createElement('div');
-        card.className = 'featured-card reveal reveal-delay-' + (i + 1);
-        card.innerHTML = `
-          <div class="featured-img" data-char="${item.char}">
-            <span class="featured-badge">${item.badge}</span>
-          </div>
-          <div class="featured-info">
-            <div class="featured-name">${item.name}</div>
-            <div class="featured-price">¥${item.price}<span> / ${item.unit}</span></div>
-            <div class="featured-story">${item.story}</div>
-          </div>
-        `;
-        featuredScroll.appendChild(card);
+      const fsc = document.getElementById('featuredScroll');
+      DATA.featured.forEach((it,i)=>{
+        const el = document.createElement('div'); el.className = 'feat-card reveal reveal-d'+(i+1);
+        el.innerHTML = `<div class="feat-img" data-char="${it.char}"><span class="feat-badge">${it.badge}</span></div><div class="feat-body"><div class="feat-name">${it.name}</div><div class="feat-meta"><div class="feat-price">¥${it.price}<span>/${it.unit}</span></div><span class="feat-tag">${it.badge}</span></div><div class="feat-story">${it.story}</div></div>`;
+        el.onclick = ()=>openDishModal(it);
+        fsc.appendChild(el);
       });
-
-      // 分类标签
-      const tabs = document.getElementById('categoryTabs');
-      DATA.categories.forEach((cat, i) => {
-        const btn = document.createElement('button');
-        btn.className = 'category-tab' + (i === 0 ? ' active' : '');
-        btn.textContent = cat.name;
-        btn.dataset.category = cat.id;
-        btn.onclick = () => switchCategory(cat.id, btn);
-        tabs.appendChild(btn);
+      // 分类
+      const tabs = document.getElementById('catTabs');
+      DATA.categories.forEach((c,i)=>{
+        const b = document.createElement('button'); b.className = 'cat-tab'+(i===0?' active':''); b.textContent = c.name; b.onclick = ()=>switchCat(c.id,b); tabs.appendChild(b);
       });
-
-      // 初始菜单
       renderMenu('steam');
-
-      // 品牌故事
-      const storyCards = document.getElementById('storyCards');
-      DATA.stories.forEach((story, i) => {
-        const card = document.createElement('div');
-        card.className = 'story-card reveal reveal-delay-' + (i + 1);
-        card.innerHTML = `
-          <span class="story-num">${story.num}</span>
-          <h4>${story.title}</h4>
-          <p>${story.desc}</p>
-        `;
-        storyCards.appendChild(card);
+      // 故事
+      const ssc = document.getElementById('storyScroll');
+      DATA.stories.forEach((s,i)=>{
+        const el = document.createElement('div'); el.className = 'story-card reveal reveal-d'+(i+1);
+        el.innerHTML = `<span class="story-num">${s.num}</span><h4>${s.title}</h4><p style="font-size:11px;color:var(--gold);margin-bottom:6px;letter-spacing:1px;">${s.verse}</p><p>${s.desc}</p>`;
+        el.onclick = ()=>openModal(`<div class="modal-title">${s.title}</div><p style="font-size:11px;color:var(--gold);margin-bottom:12px;letter-spacing:1px;">${s.verse}</p><p style="font-size:13px;color:var(--text-light);line-height:1.8;margin-bottom:16px;">${s.desc}</p><div style="background:var(--bg-warm);padding:14px;border-radius:8px;border-left:3px solid var(--accent);"><p style="font-size:12px;color:var(--text);line-height:1.8;">${s.lore}</p></div>`);
+        ssc.appendChild(el);
       });
-
-      // 门店氛围
-      const vibeGrid = document.getElementById('vibeGrid');
-      DATA.vibes.forEach((vibe, i) => {
-        const item = document.createElement('div');
-        item.className = 'vibe-item reveal reveal-delay-' + (i + 1);
-        item.innerHTML = `<span>${vibe.text}</span><span class="vibe-label">${vibe.label}</span>`;
-        vibeGrid.appendChild(item);
+      // 氛围
+      const vsc = document.getElementById('vibeScroll');
+      DATA.vibes.forEach((v,i)=>{
+        const el = document.createElement('div'); el.className = 'vibe-card reveal reveal-d'+(i+1);
+        el.innerHTML = `<div class="vibe-img"><span>${v.title}</span><span class="vibe-label">${v.label}</span></div><div class="vibe-info"><h5>${v.title}</h5><p>${v.desc}</p></div>`;
+        el.onclick = ()=>openModal(`<div class="modal-title">${v.label}</div><p style="font-size:13px;color:var(--text-light);line-height:1.8;margin-bottom:16px;">${v.desc}</p><div style="display:flex;gap:10px;margin-bottom:12px;"><div style="flex:1;background:var(--bg-warm);padding:12px;border-radius:8px;text-align:center;"><div style="font-size:10px;color:var(--text-light);">容纳人数</div><div style="font-size:16px;color:var(--accent);font-weight:600;margin-top:2px;">${v.capacity}</div></div><div style="flex:1;background:var(--bg-warm);padding:12px;border-radius:8px;text-align:center;"><div style="font-size:10px;color:var(--text-light);">适配场景</div><div style="font-size:12px;color:var(--accent);margin-top:4px;">${v.scene}</div></div></div><a class="sbtn red" href="#store" onclick="closeModal();document.getElementById('store').scrollIntoView({behavior:'smooth'});return false;" style="display:block;text-align:center;">立即预订此场景</a>`);
+        vsc.appendChild(el);
       });
-      // 补充一个占位图（占两列）
-      const wide = document.createElement('div');
-      wide.className = 'vibe-item reveal';
-      wide.innerHTML = `<span>楚韵味道</span><span class="vibe-label">待补充实景照片</span>`;
-      vibeGrid.appendChild(wide);
+      renderWall();
     }
 
-    function renderMenu(categoryId) {
-      const grid = document.getElementById('menuGrid');
-      grid.innerHTML = '';
-      const items = DATA.menu[categoryId] || [];
-      items.forEach((item, i) => {
-        const div = document.createElement('div');
-        div.className = 'menu-item reveal reveal-delay-' + ((i % 3) + 1);
-        div.innerHTML = `
-          <div class="menu-item-img" data-char="${item.char}">
-            <span class="menu-item-tag ${item.tagClass}">${item.tag}</span>
-          </div>
-          <div class="menu-item-name">${item.name}</div>
-          <div class="menu-item-price">¥${item.price}</div>
-          <div class="menu-item-desc">${item.desc}</div>
-        `;
-        grid.appendChild(div);
+    function renderMenu(catId) {
+      const g = document.getElementById('menuGrid'); g.innerHTML = '';
+      const list = DATA.menu[catId]||[];
+      list.forEach((it,i)=>{
+        const el = document.createElement('div'); el.className = 'menu-card reveal reveal-d'+((i%3)+1);
+        el.innerHTML = `<div class="menu-img" data-char="${it.char}"><span class="menu-tag ${it.tagCls}">${it.tag}</span></div><div class="menu-name">${it.name}</div><div class="menu-price">¥${it.price}</div><div class="menu-brief">${it.brief}</div>`;
+        el.onclick = ()=>openModal(`<div class="modal-title">${it.name}</div><div style="width:100%;aspect-ratio:4/3;background:linear-gradient(135deg,#EDE6D6,#D4C8B0);border-radius:8px;margin-bottom:14px;display:flex;align-items:center;justify-content:center;font-family:'Ma Shan Zheng',cursive;font-size:48px;color:rgba(139,26,26,.08);">${it.char}</div><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;"><span style="font-size:18px;color:var(--gold);font-weight:600;">¥${it.price}</span><span style="font-size:10px;padding:2px 8px;border-radius:4px;background:${it.tagCls==='new'?'#5A7D5A':it.tagCls==='pick'?'var(--gold)':'var(--accent)'};color:white;">${it.tag}</span></div><p style="font-size:12px;color:var(--text-light);line-height:1.7;">${it.brief}</p>`);
+        g.appendChild(el);
       });
-      // 触发重新观察
-      requestAnimationFrame(() => observeElements());
+      setTimeout(observe,50);
+    }
+    function switchCat(id,btn){ document.querySelectorAll('.cat-tab').forEach(t=>t.classList.remove('active')); btn.classList.add('active'); renderMenu(id); }
+
+    function openDishModal(it){
+      openModal(`<div class="modal-title">${it.name}</div><div style="width:100%;aspect-ratio:16/10;background:linear-gradient(135deg,#E8DED0,#D4C8B0);border-radius:8px;margin-bottom:14px;display:flex;align-items:center;justify-content:center;font-family:'Ma Shan Zheng',cursive;font-size:56px;color:rgba(139,26,26,.08);">${it.char}</div><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;"><span style="font-size:20px;color:var(--gold);font-weight:600;">¥${it.price}</span><span style="font-size:10px;padding:3px 10px;border-radius:20px;background:var(--accent);color:white;">${it.badge}</span></div><p style="font-size:13px;color:var(--text);line-height:1.8;margin-bottom:12px;">${it.detail}</p><div style="background:var(--bg-warm);padding:12px;border-radius:8px;margin-bottom:12px;"><div style="font-size:10px;color:var(--gold);margin-bottom:4px;letter-spacing:1px;">宴席搭配</div><p style="font-size:12px;color:var(--text-light);line-height:1.6;">${it.pair}</p></div><div style="background:rgba(139,26,26,.04);padding:12px;border-radius:8px;border-left:2px solid var(--accent);"><p style="font-size:11px;color:var(--text-light);line-height:1.6;font-style:italic;">${it.review}</p></div>`);
     }
 
-    function switchCategory(id, btn) {
-      document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
-      btn.classList.add('active');
-      renderMenu(id);
+    /* ========== 留言墙 ========== */
+    function getWall(){ try{ return JSON.parse(localStorage.getItem('chuyun_wall')||'[]'); }catch(e){ return []; } }
+    function saveWall(arr){ localStorage.setItem('chuyun_wall',JSON.stringify(arr.slice(0,50))); }
+    function renderWall(){
+      const list = document.getElementById('wallList'); const arr = getWall();
+      if(arr.length===0){ list.innerHTML = '<div class="wall-empty">尚无留言，做第一位写下乡音的人</div>'; return; }
+      list.innerHTML = arr.map(w=>`<div class="wall-item">${w.text}<div class="wall-time">${w.time}</div></div>`).join('');
+    }
+    function addWall(){
+      const input = document.getElementById('wallInput'); const text = input.value.trim();
+      if(!text){ alert('请写下您的乡情故事'); return; }
+      const arr = getWall(); arr.unshift({ text, time: new Date().toLocaleString('zh-CN',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}) });
+      saveWall(arr); input.value = ''; renderWall();
     }
 
-    /* ============================================
-       滚动动画（Intersection Observer）
-       ============================================ */
-    let observer;
-    function observeElements() {
-      if (observer) observer.disconnect();
-      observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-          }
-        });
-      }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
-      document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    /* ========== 预约 ========== */
+    function submitBooking(){
+      const d = document.getElementById('bookDate').value;
+      const t = document.getElementById('bookTime').value;
+      const p = document.getElementById('bookPeople').value;
+      const ph = document.getElementById('bookPhone').value.trim();
+      if(!d||!t||!p||!ph){ alert('请填写完整的预约信息'); return; }
+      alert(`预约信息已记录：\n日期：${d}\n时段：${t}\n人数：${p}\n电话：${ph}\n\n（此为演示，实际需接入后端或短信通知）`);
     }
 
-    /* ============================================
-       导航栏显示/隐藏
-       ============================================ */
-    const navbar = document.getElementById('navbar');
-    const backTop = document.getElementById('backTop');
-    let lastScroll = 0;
-    window.addEventListener('scroll', () => {
-      const y = window.scrollY;
-      // 导航栏
-      if (y > 300) navbar.classList.add('visible');
-      else navbar.classList.remove('visible');
-      // 返回顶部
-      if (y > 600) backTop.classList.add('visible');
-      else backTop.classList.remove('visible');
-      lastScroll = y;
-    }, { passive: true });
+    /* ========== 随机知识 ========== */
+    function randomTip(){ const t = DATA.tips[Math.floor(Math.random()*DATA.tips.length)]; openModal(`<div class="modal-title">楚菜小知识</div><div style="background:var(--bg-warm);padding:18px;border-radius:8px;border-left:3px solid var(--accent);"><p style="font-size:13px;color:var(--text);line-height:1.8;">${t}</p></div><p style="font-size:10px;color:var(--text-light);margin-top:10px;text-align:center;">点击侧边按钮切换下一条</p>`); }
 
-    /* ============================================
-       加载完成
-       ============================================ */
-    window.addEventListener('load', () => {
-      render();
-      observeElements();
-      setTimeout(() => {
-        document.getElementById('loading').classList.add('done');
-      }, 1200);
-    });
+    /* ========== 滚动动画 ========== */
+    let obs;
+    function observe(){ if(obs) obs.disconnect(); obs = new IntersectionObserver((entries)=>{ entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('visible'); }); },{threshold:.08,rootMargin:'0px 0px -24px 0px'}); document.querySelectorAll('.reveal').forEach(el=>obs.observe(el)); }
+
+    /* ========== 导航&返回顶部 ========== */
+    const navbar = document.getElementById('navbar'); const backTop = document.getElementById('backTop');
+    window.addEventListener('scroll',()=>{ const y=window.scrollY; navbar.classList.toggle('show',y>280); backTop.classList.toggle('show',y>500); },{passive:true});
+
+    /* ========== 启动 ========== */
+    function init(){
+      try{ render(); observe(); }catch(e){ console.error(e); }
+      setTimeout(()=>{ const l=document.getElementById('loading'); if(l) l.classList.add('done'); },1000);
+    }
+    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
+    setTimeout(()=>{ const l=document.getElementById('loading'); if(l) l.classList.add('done'); },3500);
   </script>
 </body>
 </html>
