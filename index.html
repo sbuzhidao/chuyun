@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>楚韵 · 荆楚非遗乡情</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -191,17 +194,6 @@
     .sbtn.red:active { background:var(--accent-light); }
     .sbtn.ghost { background:transparent; color:var(--gold-light); border:1px solid rgba(184,149,106,.25); }
 
-    /* ========== 预约表单 ========== */
-    .booking-form { margin-top:18px; padding-top:18px; border-top:1px solid rgba(184,149,106,.15); }
-    .booking-form h4 { font-family:'Ma Shan Zheng',cursive; font-size:15px; color:var(--gold-light); letter-spacing:2px; margin-bottom:12px; }
-    .form-row { display:flex; gap:8px; margin-bottom:10px; }
-    .form-row input, .form-row select { flex:1; padding:9px 12px; border-radius:var(--radius-sm); border:1px solid rgba(184,149,106,.2); background:rgba(245,240,232,.06); color:var(--text-white); font-size:12px; font-family:'Noto Serif SC',serif; outline:none; }
-    .form-row input::placeholder { color:rgba(245,240,232,.35); }
-    .form-row select { color:rgba(245,240,232,.7); }
-    .form-row select option { background:var(--bg-dark); color:var(--text); }
-    .form-submit { width:100%; padding:11px; background:var(--accent); color:white; border:none; border-radius:var(--radius-sm); font-size:12px; letter-spacing:2px; cursor:pointer; font-family:'Noto Serif SC',serif; margin-top:4px; }
-    .form-submit:active { background:var(--accent-light); }
-
     /* ========== 侧边栏 ========== */
     .side-fab { position:fixed; bottom:80px; right:14px; z-index:90; display:flex; flex-direction:column; gap:10px; }
     .fab { width:44px; height:44px; border-radius:50%; border:none; background:var(--accent); color:white; font-size:18px; cursor:pointer; box-shadow:0 4px 14px rgba(139,26,26,.25); display:flex; align-items:center; justify-content:center; transition:var(--tr); }
@@ -216,12 +208,106 @@
     .footer-branch { font-size:10px; letter-spacing:2px; margin-bottom:12px; }
     .footer-qr { width:90px; height:90px; margin:0 auto 10px; background:white; padding:3px; border-radius:8px; }
     .footer-qr-inner { width:100%; height:100%; background:var(--bg-warm); border-radius:5px; display:flex; align-items:center; justify-content:center; font-size:9px; color:var(--text-light); }
+    .footer-qr-tip { font-size:11px; color:var(--gold-light); letter-spacing:1px; margin-top:6px; margin-bottom:4px; }
     .footer-copy { font-size:9px; opacity:.5; margin-top:10px; }
 
     /* ========== 返回顶部 ========== */
     .backtop { position:fixed; bottom:20px; right:14px; z-index:90; width:44px; height:44px; border-radius:50%; background:var(--accent); color:white; border:none; display:flex; align-items:center; justify-content:center; font-size:16px; cursor:pointer; opacity:0; transform:translateY(20px); transition:var(--tr); box-shadow:0 4px 12px rgba(139,26,26,.25); }
     .backtop.show { opacity:1; transform:translateY(0); }
     .backtop:active { transform:scale(.9); }
+
+    /* ========== 响应式：平板 & 电脑 ========== */
+    @media (min-width: 768px) {
+      .hero-verse { font-size: 52px; }
+      .hero-pot { width: 150px; height: 150px; }
+      .hero-pot .pot-char { font-size: 40px; }
+      .sec-title { font-size: 34px; }
+      .sec-head { padding: 72px 40px 36px; }
+      .sec-desc { max-width: 400px; font-size: 14px; }
+
+      /* 招牌卡片：不换行，居中，间距加大 */
+      .featured-scroll { justify-content: center; gap: 20px; padding: 0 40px 20px; }
+      .feat-card { flex: 0 0 280px; max-width: 320px; }
+      .feat-img { height: 190px; }
+
+      /* 菜单：3列 */
+      .menu-grid { grid-template-columns: repeat(3, 1fr); max-width: 800px; gap: 16px; padding: 0 40px; }
+      .menu-name { font-size: 17px; }
+      .menu-price { font-size: 14px; }
+
+      /* 分类标签居中 */
+      .cat-tabs { justify-content: center; padding: 0 40px 22px; }
+      .cat-tab { padding: 9px 22px; font-size: 14px; }
+
+      /* 故事：居中 */
+      .story-scroll { justify-content: center; gap: 18px; padding: 0 40px 14px; }
+      .story-card { flex: 0 0 300px; max-width: 340px; padding: 26px; }
+      .story-card h4 { font-size: 20px; }
+
+      /* 氛围：居中 */
+      .vibe-scroll { justify-content: center; gap: 14px; padding: 0 40px 14px; }
+      .vibe-card { flex: 0 0 220px; max-width: 260px; }
+
+      /* 门店&留言墙：限制宽度居中 */
+      .store-card { margin: 0 auto; max-width: 720px; }
+      .wall-box { margin: 0 auto; max-width: 720px; }
+
+      /* 弹窗：居中显示 */
+      .modal-box { border-radius: var(--radius); max-height: 80vh; transform: translateY(20px); }
+      .modal-overlay.active .modal-box { transform: translateY(0); }
+    }
+
+    @media (min-width: 1200px) {
+      .hero-verse { font-size: 64px; letter-spacing: 8px; }
+      .hero-branch { font-size: 14px; }
+      .hero-btns { gap: 16px; margin-top: 36px; }
+      .hero-btn { padding: 14px 36px; font-size: 15px; }
+      .sec-title { font-size: 40px; }
+      .sec-head { padding: 88px 60px 44px; }
+
+      /* 招牌卡片 */
+      .featured-scroll { gap: 24px; padding: 0 60px 24px; }
+      .feat-card { flex: 0 0 320px; }
+      .feat-img { height: 210px; }
+      .feat-name { font-size: 22px; }
+      .feat-price { font-size: 16px; }
+
+      /* 菜单：4列 */
+      .menu-grid { grid-template-columns: repeat(4, 1fr); max-width: 1100px; gap: 20px; padding: 0 60px; }
+      .menu-img { aspect-ratio: 16/10; }
+      .menu-name { font-size: 18px; }
+
+      /* 故事 */
+      .story-scroll { gap: 22px; padding: 0 60px 14px; }
+      .story-card { flex: 0 0 340px; padding: 28px; }
+
+      /* 氛围 */
+      .vibe-scroll { gap: 18px; padding: 0 60px 14px; }
+      .vibe-card { flex: 0 0 260px; }
+
+      /* 门店 */
+      .store-card { max-width: 860px; padding: 40px 48px; }
+      .store-card h3 { font-size: 28px; }
+      .store-text { font-size: 14px; }
+      .sbtn { font-size: 14px; padding: 13px; }
+
+      /* 留言墙 */
+      .wall-box { max-width: 860px; padding: 28px; }
+      .wall-title { font-size: 20px; }
+      .wall-input { font-size: 14px; }
+
+      /* 页脚 */
+      .footer { padding: 40px; }
+      .footer-brand { font-size: 24px; }
+      .footer-qr { width: 110px; height: 110px; }
+    }
+
+    /* 超宽屏：限制最大宽度，避免内容过散 */
+    @media (min-width: 1400px) {
+      .hero-bg, .guide-bar, .featured, .menu-sec, .story-sec, .wall-sec, .vibe-sec, .store-sec, .footer {
+        max-width: 1400px; margin-left: auto; margin-right: auto;
+      }
+    }
   </style>
 </head>
 <body>
@@ -360,27 +446,8 @@
       <div class="store-row"><div class="store-icon">🕐</div><div class="store-text"><strong>营业时间</strong>午餐 11:00-14:00 / 晚餐 17:00-21:00</div></div>
       <div class="store-row"><div class="store-icon">🍽</div><div class="store-text"><strong>特色服务</strong>大包房可预订 · 湖北食材直运 · 承接宴席</div></div>
       <div class="store-btns">
-        <a class="sbtn red" href="tel:请补充电话" onclick="if(this.href.includes('请补充')){alert('请先在代码中补充门店电话');return false;}">📞 电话预订</a>
-        <a class="sbtn ghost" href="https://map.baidu.com/search/宝鸡公园路楚韵农家菜" target="_blank">🧭 导航到店</a>
-      </div>
-      <div class="booking-form">
-        <h4>包房预约</h4>
-        <div class="form-row">
-          <input type="date" id="bookDate">
-          <select id="bookTime">
-            <option value="">选择时段</option>
-            <option>午餐 11:00</option><option>午餐 12:00</option>
-            <option>晚餐 17:00</option><option>晚餐 18:00</option><option>晚餐 19:00</option>
-          </select>
-        </div>
-        <div class="form-row">
-          <select id="bookPeople">
-            <option value="">聚餐人数</option>
-            <option>2-4人</option><option>5-8人</option><option>9-12人</option><option>12人以上</option>
-          </select>
-          <input type="text" id="bookPhone" placeholder="联系电话">
-        </div>
-        <button class="form-submit" onclick="submitBooking()">提交预约</button>
+        <a class="sbtn red" href="tel:0917-8888888">📞 电话预订</a>
+        <a class="sbtn ghost" href="https://uri.amap.com/search?keyword=宝鸡公园路楚韵农家菜" target="_blank">🧭 导航到店</a>
       </div>
     </div>
   </section>
@@ -389,7 +456,9 @@
   <footer class="footer">
     <div class="footer-brand">楚韵农家菜</div>
     <div class="footer-branch">公园路店</div>
-    <div class="footer-qr"><div class="footer-qr-inner">扫码<br>看菜单</div></div>
+    <!-- 【微信二维码替换说明】把下方 footer-qr-inner 中的文字换成 <img src="微信二维码图片地址"> 即可 -->
+    <div class="footer-qr"><div class="footer-qr-inner">添加<br>微信</div></div>
+    <div class="footer-qr-tip">扫码添加微信 · 预订包房</div>
     <div class="footer-copy"> 楚韵农家菜（公园路店）· 保留所有权利</div>
   </footer>
 
@@ -537,16 +606,6 @@
       if(!text){ alert('请写下您的乡情故事'); return; }
       const arr = getWall(); arr.unshift({ text, time: new Date().toLocaleString('zh-CN',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}) });
       saveWall(arr); input.value = ''; renderWall();
-    }
-
-    /* ========== 预约 ========== */
-    function submitBooking(){
-      const d = document.getElementById('bookDate').value;
-      const t = document.getElementById('bookTime').value;
-      const p = document.getElementById('bookPeople').value;
-      const ph = document.getElementById('bookPhone').value.trim();
-      if(!d||!t||!p||!ph){ alert('请填写完整的预约信息'); return; }
-      alert(`预约信息已记录：\n日期：${d}\n时段：${t}\n人数：${p}\n电话：${ph}\n\n（此为演示，实际需接入后端或短信通知）`);
     }
 
     /* ========== 随机知识 ========== */
