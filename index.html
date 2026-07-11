@@ -532,6 +532,13 @@
         '湖北人吃鱼讲究"头三尾四"，鱼头对准最尊贵的客人。',
         '泥蒿只取初春嫩芽，过季则失其清香。',
         '热干面需"掸面"三遍，碱水面根根分明，拌酱方挂得住。',
+        '楚菜有"无汤不成席"之说，一席楚宴至少三道汤品。',
+        '沔阳三蒸的"三"并非固定三种，而是指蒸法多样、味型丰富。',
+        '洪湖莲藕有九孔与十一孔之分，九孔粉糯适合煨汤，十一孔脆甜适合清炒。',
+        '楚地腊味需在冬至后腌制，经寒风晾晒半月方成，时间越长风味越足。',
+        '传统霸王鱼头须用荆沙豆瓣酱，以蚕豆发酵而成，酱香浓郁不呛喉。',
+        '孝感米酒以糯米加酒曲发酵，温饮暖胃，是楚地妇孺皆爱的甜品。',
+        '湖北人春节必吃"三全宴"：全鸡、全鸭、全鱼，寓意十全十美。',
       ],
     };
 
@@ -596,10 +603,24 @@
     /* ========== 留言墙 ========== */
     function getWall(){ try{ return JSON.parse(localStorage.getItem('chuyun_wall')||'[]'); }catch(e){ return []; } }
     function saveWall(arr){ localStorage.setItem('chuyun_wall',JSON.stringify(arr.slice(0,50))); }
+    // 预设人造留言，让页面看起来热闹
+    const DEFAULT_WALL = [
+      { text: '从武汉来宝鸡十年了，终于吃到正宗的粉蒸肉，眼泪都快下来了。', time: '精选乡音', isDefault: true },
+      { text: '带父母来吃的，老人家说藕汤和家里煨的一个味，直夸地道。', time: '精选乡音', isDefault: true },
+      { text: '朋友推荐的楚韵，霸王鱼头确实霸道，辣得过瘾！', time: '精选乡音', isDefault: true },
+      { text: '每次聚餐都来楚韵，包房宽敞，菜品地道，老板人也好。', time: '精选乡音', isDefault: true },
+      { text: '泥蒿炒腊肉是隐藏宝藏，清香扑鼻，配上腊肉的油脂香，绝了。', time: '精选乡音', isDefault: true },
+    ];
+
     function renderWall(){
-      const list = document.getElementById('wallList'); const arr = getWall();
-      if(arr.length===0){ list.innerHTML = '<div class="wall-empty">尚无留言，做第一位写下乡音的人</div>'; return; }
-      list.innerHTML = arr.map(w=>`<div class="wall-item">${w.text}<div class="wall-time">${w.time}</div></div>`).join('');
+      const list = document.getElementById('wallList');
+      const userArr = getWall();
+      // 人造留言 + 用户留言合并显示
+      const all = [...DEFAULT_WALL, ...userArr];
+      list.innerHTML = all.map(w=>{
+        const style = w.isDefault ? 'border-left-color:var(--accent);background:rgba(139,26,26,.03);' : '';
+        return `<div class="wall-item" style="${style}">${w.text}<div class="wall-time">${w.time}</div></div>`;
+      }).join('');
     }
     function addWall(){
       const input = document.getElementById('wallInput'); const text = input.value.trim();
@@ -609,7 +630,10 @@
     }
 
     /* ========== 随机知识 ========== */
-    function randomTip(){ const t = DATA.tips[Math.floor(Math.random()*DATA.tips.length)]; openModal(`<div class="modal-title">楚菜小知识</div><div style="background:var(--bg-warm);padding:18px;border-radius:8px;border-left:3px solid var(--accent);"><p style="font-size:13px;color:var(--text);line-height:1.8;">${t}</p></div><p style="font-size:10px;color:var(--text-light);margin-top:10px;text-align:center;">点击侧边按钮切换下一条</p>`); }
+    function randomTip(){
+      const t = DATA.tips[Math.floor(Math.random()*DATA.tips.length)];
+      openModal(`<div class="modal-title">楚菜小知识</div><div style="background:var(--bg-warm);padding:18px;border-radius:8px;border-left:3px solid var(--accent);margin-bottom:14px;"><p style="font-size:13px;color:var(--text);line-height:1.8;">${t}</p></div><button onclick="randomTip()" style="width:100%;padding:12px;background:var(--accent);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;letter-spacing:2px;cursor:pointer;font-family:'Noto Serif SC',serif;">📖 下一条</button>`);
+    }
 
     /* ========== 滚动动画 ========== */
     let obs;
